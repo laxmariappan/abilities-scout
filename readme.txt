@@ -18,9 +18,19 @@ Abilities Scout scans your installed WordPress plugins and discovers potential "
 
 Uses PHP tokenization (`token_get_all()`) to statically analyze plugin source code and extract action hooks, filter hooks, REST API routes, and shortcodes — without executing any scanned code.
 
+A built-in scoring engine classifies every discovery by ability potential:
+
+* REST routes score highest — they are structured APIs already
+* Hooks with action verbs (submit, create, delete) are classified as tools
+* Hooks with data verbs (get, list, check) are classified as resources
+* Infrastructure plumbing (nonces, enqueue, CSS) is filtered out
+
 **Features:**
 
 * Scan any installed plugin with one click
+* Smart ability scoring with confidence levels (high, medium, low)
+* Suggested ability names and type classification (tool vs resource)
+* Export results as Markdown (AI-agent-friendly) or JSON
 * Discover action hooks, filter hooks, REST routes, and shortcodes
 * See file locations and line numbers for every discovery
 * Works as a companion to Abilities Explorer or standalone
@@ -47,12 +57,18 @@ No. Scout is a read-only discovery tool. It identifies *potential* abilities in 
 
 No. Scout uses PHP's `token_get_all()` to lexically analyze source code. It only reads files — it never modifies, executes, or includes scanned code.
 
+= What are the export formats? =
+
+Markdown and JSON. The Markdown export includes the full `wp_register_ability()` pattern and is designed to be fed to AI coding tools. The JSON export provides structured data for programmatic use.
+
 == Changelog ==
 
 = 1.0.0 =
 * Initial release.
 * Static code scanner using PHP tokenization.
-* Admin UI with tabbed results display.
+* Smart ability scoring with confidence levels.
+* Markdown and JSON export for AI agents.
+* Admin UI with potential abilities cards and collapsible raw view.
 * Companion integration with Abilities Explorer.
 
 == Disclaimer ==
