@@ -112,6 +112,7 @@ class Abilities_Scout_Admin_Page {
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'abilities_scout_scan' ),
+				'version' => ABILITIES_SCOUT_VERSION,
 				'strings' => array(
 					'scanning'          => __( 'Scanning plugin...', 'abilities-scout' ),
 					'noResults'         => __( 'No potential abilities discovered in this plugin.', 'abilities-scout' ),
@@ -122,6 +123,7 @@ class Abilities_Scout_Admin_Page {
 					'noPotential'       => __( 'No strong ability candidates found. Check the raw discoveries below for hooks that might be useful.', 'abilities-scout' ),
 					'tool'              => __( 'tool', 'abilities-scout' ),
 					'resource'          => __( 'resource', 'abilities-scout' ),
+					'exportLabel'       => __( 'Export scan results:', 'abilities-scout' ),
 				),
 			)
 		);
