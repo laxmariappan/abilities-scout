@@ -14,25 +14,26 @@
  */
 
 // Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
 	exit;
 }
 
 // Prevent double-loading.
-if ( defined( 'ABILITIES_SCOUT_VERSION' ) ) {
+if (defined('ABILITIES_SCOUT_VERSION')) {
 	return;
 }
 
 // Define plugin constants.
-define( 'ABILITIES_SCOUT_VERSION', '1.0.0' );
-define( 'ABILITIES_SCOUT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'ABILITIES_SCOUT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'ABILITIES_SCOUT_PLUGIN_FILE', __FILE__ );
+define('ABILITIES_SCOUT_VERSION', '1.0.0');
+define('ABILITIES_SCOUT_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('ABILITIES_SCOUT_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('ABILITIES_SCOUT_PLUGIN_FILE', __FILE__);
 
 /**
  * Main Abilities Scout class.
  */
-class Abilities_Scout {
+class Abilities_Scout
+{
 
 	/**
 	 * Single instance of the class.
@@ -46,8 +47,9 @@ class Abilities_Scout {
 	 *
 	 * @return Abilities_Scout
 	 */
-	public static function get_instance(): Abilities_Scout {
-		if ( null === self::$instance ) {
+	public static function get_instance(): Abilities_Scout
+	{
+		if (null === self::$instance) {
 			self::$instance = new self();
 		}
 		return self::$instance;
@@ -56,19 +58,21 @@ class Abilities_Scout {
 	/**
 	 * Constructor.
 	 */
-	private function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'init' ) );
+	private function __construct()
+	{
+		add_action('plugins_loaded', array($this, 'init'));
 	}
 
 	/**
 	 * Initialize the plugin.
 	 */
-	public function init(): void {
+	public function init(): void
+	{
 		// Load plugin files.
 		$this->load_dependencies();
 
 		// Initialize admin.
-		if ( is_admin() ) {
+		if (is_admin()) {
 			$this->init_admin();
 		}
 	}
@@ -76,8 +80,17 @@ class Abilities_Scout {
 	/**
 	 * Load plugin dependencies.
 	 */
-	private function load_dependencies(): void {
+	private function load_dependencies(): void
+	{
 		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-scanner.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-mcp-tools.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-export-generator.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-draft-generator.php';
+
+		// Initialize MCP tools (only if Abilities API is available).
+		if (function_exists('wp_register_ability')) {
+			new Abilities_Scout_MCP_Tools();
+		}
 	}
 
 	/**
@@ -88,8 +101,9 @@ class Abilities_Scout {
 	/**
 	 * Initialize admin functionality.
 	 */
-	private function init_admin(): void {
-		if ( $this->admin_initialized ) {
+	private function init_admin(): void
+	{
+		if ($this->admin_initialized) {
 			return;
 		}
 		$this->admin_initialized = true;
