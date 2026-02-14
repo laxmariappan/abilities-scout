@@ -55,90 +55,58 @@ class Abilities_Scout_Draft_Generator
         $source_id = $this->get_source_identifier($ability);
         $func_name = str_replace(array('-', '/'), '_', $name) . '_execute';
 
-        ob_start();
+        $code = "<?php\n";
+        $code .= "/**\n";
+        $code .= " * Auto-generated ability stub by Abilities Scout\n";
+        $code .= " *\n";
+        $code .= " * Source Hook: " . esc_html($source_id) . "\n";
+        $code .= " * File: " . esc_html($source['file']) . ":" . intval($source['line']) . "\n";
+        $code .= " * Confidence: " . esc_html($ability['confidence']) . "\n";
+        $code .= " *\n";
+        $code .= " * TODO: Review and customize this ability before registering\n";
+        $code .= " */\n\n";
 
-        echo "<?php\n";
-        ?>
-        /**
-        * Auto-generated ability stub by Abilities Scout
-        *
-        * Source Hook:
-        <?php echo esc_html($source_id); ?>
+        $code .= "wp_register_ability( '" . esc_html($name) . "', array(\n";
+        $code .= "\t'label'       => '" . esc_html($label) . "',\n";
+        $code .= "\t'description' => '" . esc_html($description) . "',\n\n";
 
-        * File:
-        <?php echo esc_html($source['file']); ?>:
-        <?php echo intval($source['line']); ?>
+        $code .= "\t'input_schema' => array(\n";
+        $code .= "\t\t'type'       => 'object',\n";
+        $code .= "\t\t'properties' => array(\n";
+        $code .= "\t\t\t// TODO: Define input parameters based on " . esc_html($source_id) . "\n";
+        $code .= "\t\t),\n";
+        $code .= "\t\t'required'   => array(),\n";
+        $code .= "\t),\n\n";
 
-        * Confidence:
-        <?php echo esc_html($ability['confidence']); ?>
+        $code .= "\t'output_schema' => array(\n";
+        $code .= "\t\t'type'       => 'object',\n";
+        $code .= "\t\t'properties' => array(\n";
+        $code .= "\t\t\t// TODO: Define the output structure\n";
+        $code .= "\t\t),\n";
+        $code .= "\t),\n\n";
 
-        *
-        * TODO: Review and customize this ability before registering
-        */
+        $code .= "\t'execute_callback'    => '" . esc_html($func_name) . "',\n\n";
 
-        wp_register_ability( '
-        <?php echo esc_html($name); ?>', array(
-        'label' => '
-        <?php echo esc_html($label); ?>',
-        'description' => '
-        <?php echo esc_html($description); ?>',
+        $code .= "\t'permission_callback' => function() {\n";
+        $code .= "\t\treturn current_user_can( 'manage_options' );\n";
+        $code .= "\t},\n";
+        $code .= ") );\n\n";
 
-        'input_schema' => array(
-        'type' => 'object',
-        'properties' => array(
-        // TODO: Define input parameters based on
-        <?php echo esc_html($source_id); ?>
+        $code .= "/**\n";
+        $code .= " * Execute callback for " . esc_html($name) . "\n";
+        $code .= " *\n";
+        $code .= " * @param array \$args Input arguments matching input_schema\n";
+        $code .= " * @return array Output matching output_schema\n";
+        $code .= " */\n";
+        $code .= "function " . esc_html($func_name) . "( \$args ) {\n";
+        $code .= "\t// TODO: Implement ability logic\n";
+        $code .= "\treturn array(\n";
+        $code .= "\t\t'success' => true,\n";
+        $code .= "\t\t'data'    => array(),\n";
+        $code .= "\t);\n";
+        $code .= "}\n";
 
-        // Analyze the hook signature to determine required parameters
-        ),
-        'required' => array(), // TODO: List required parameters
-        ),
-
-        'output_schema' => array(
-        'type' => 'object',
-        'properties' => array(
-        // TODO: Define the output structure
-        ),
-        ),
-
-        'execute_callback' => '
-        <?php echo esc_html($func_name); ?>',
-
-        'permission_callback' => function() {
-        return current_user_can( 'manage_options' ); // TODO: Adjust permissions as needed
-        },
-        ) );
-
-        /**
-        * Execute callback for
-        <?php echo esc_html($name); ?>
-
-        *
-        * @param array $args Input arguments matching input_schema
-        * @return array Output matching output_schema
-        */
-        function
-        <?php echo esc_html($func_name); ?>( $args ) {
-        // TODO: Implement ability logic
-        //
-        // This ability should interact with:
-        <?php echo esc_html($source_id); ?>
-
-        //
-        // Example implementation:
-        // 1. Validate input parameters
-        // 2. Call the source hook or function
-        // 3. Process results
-        // 4. Return formatted output
-
-        return array(
-        'success' => true,
-        'data' => array(),
-        // TODO: Define actual return structure
-        );
-        }
-        <?php
-        return ob_get_clean();
+        return $code;
     }
 
     /**
