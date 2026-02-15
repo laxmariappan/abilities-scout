@@ -34,10 +34,10 @@ class Abilities_Scout_MCP_Tools
     {
         wp_register_ability_category(
             'abilities-scout',
-            [
+            array(
                 'label' => __('Abilities Scout', 'abilities-scout'),
                 'description' => __('Scans WordPress plugins to detect registerable abilities from hooks, REST routes, and shortcodes, and exposes MCP tools for programmatic access to scan, export, and draft results.', 'abilities-scout'),
-            ]
+            )
         );
     }
 
@@ -192,16 +192,13 @@ class Abilities_Scout_MCP_Tools
     }
 
     /**
-     * Execute scan ability.
+     * Private helper to perform a full scan.
      *
-     * @param array $args Input arguments.
-     * @return array|WP_Error Scan results or error.
+     * @param string $plugin_file Plugin file path.
+     * @return array|WP_Error Full scan results or error.
      */
-    public function execute_scan(array $args)
+    private function scan_plugin_full(string $plugin_file)
     {
-        $plugin_file = $args['plugin'];
-        $confidence_threshold = $args['confidence'] ?? 'low';
-
         $validation = $this->validate_plugin($plugin_file);
         if (is_wp_error($validation)) {
             return $validation;
@@ -217,6 +214,35 @@ class Abilities_Scout_MCP_Tools
         $scanner = new Abilities_Scout_Scanner();
         $results = $scanner->scan_plugin($plugin_dir);
 
+        return array(
+            'plugin_info' => array(
+                'name' => $plugin_data['Name'],
+                'version' => $plugin_data['Version'],
+                'author' => wp_strip_all_tags($plugin_data['Author']),
+                'url' => esc_url($plugin_data['PluginURI']),
+            ),
+            'results' => $results,
+        );
+    }
+
+    /**
+     * Execute scan ability.
+     *
+     * @param array $args Input arguments.
+     * @return array|WP_Error Scan results or error.
+     */
+    public function execute_scan(array $args)
+    {
+        $plugin_file = $args['plugin'];
+        $confidence_threshold = $args['confidence'] ?? 'low';
+
+        $scan_data = $this->scan_plugin_full($plugin_file);
+        if (is_wp_error($scan_data)) {
+            return $scan_data;
+        }
+
+        $results = $scan_data['results'];
+
         // Filter by confidence if needed.
         if ('low' !== $confidence_threshold) {
             $results['potential_abilities'] = $this->filter_by_confidence(
@@ -226,12 +252,7 @@ class Abilities_Scout_MCP_Tools
         }
 
         return array(
-            'plugin_info' => array(
-                'name' => $plugin_data['Name'],
-                'version' => $plugin_data['Version'],
-                'author' => wp_strip_all_tags($plugin_data['Author']),
-                'url' => esc_url($plugin_data['PluginURI']),
-            ),
+            'plugin_info' => $scan_data['plugin_info'],
             'potential_abilities' => $results['potential_abilities'],
             'stats' => $results['stats'],
         );
@@ -248,41 +269,14 @@ class Abilities_Scout_MCP_Tools
         $plugin_file = $args['plugin'];
         $format = $args['format'] ?? 'json';
 
-        // Get scan results first.
-        $scan_results = $this->execute_scan(array('plugin' => $plugin_file));
-        if (is_wp_error($scan_results)) {
-            return $scan_results;
+        $scan_data = $this->scan_plugin_full($plugin_file);
+        if (is_wp_error($scan_data)) {
+            return $scan_data;
         }
-
-        // Reconstruct full structure expected by export generator.
-        $full_data = array(
-            'plugin_info' => $scan_results['plugin_info'],
-            'discovered' => array(
-                'potential_abilities' => $scan_results['potential_abilities'],
-                'stats' => $scan_results['stats'],
-                // We don't expose raw discoveries in the simplified scan output,
-                // but we need them for export if possible.
-                // Since execute_scan filters stuff, let's re-scan or modify execute_scan.
-                // For efficiency, let's modify execute_scan to return raw if needed,
-                // or just re-scan here since we need full data.
-                // Actually, let's just re-scan to get everything including raw discoveries.
-            ),
-        );
-
-        // Re-run scan to get raw data which execute_scan might filter out or not return structure-wise.
-        // Wait, execute_scan returns minimal data. Let's direct call scanner again to be safe and cleaner.
-        // Or refactor helper.
-        $validation = $this->validate_plugin($plugin_file);
-        if (is_wp_error($validation)) {
-            return $validation;
-        }
-        list($plugin_data, $plugin_dir) = $validation;
-        $scanner = new Abilities_Scout_Scanner();
-        $raw_results = $scanner->scan_plugin($plugin_dir);
 
         $export_data = array(
-            'plugin_info' => $scan_results['plugin_info'],
-            'discovered' => $raw_results,
+            'plugin_info' => $scan_data['plugin_info'],
+            'discovered' => $scan_data['results'],
         );
 
         $generator = new Abilities_Scout_Export_Generator();

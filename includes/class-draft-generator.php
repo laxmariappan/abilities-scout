@@ -59,21 +59,21 @@ class Abilities_Scout_Draft_Generator
         $code .= "/**\n";
         $code .= " * Auto-generated ability stub by Abilities Scout\n";
         $code .= " *\n";
-        $code .= " * Source Hook: " . esc_html($source_id) . "\n";
-        $code .= " * File: " . esc_html($source['file']) . ":" . intval($source['line']) . "\n";
-        $code .= " * Confidence: " . esc_html($ability['confidence']) . "\n";
+        $code .= " * Source Hook: " . $source_id . "\n";
+        $code .= " * File: " . $source['file'] . ":" . intval($source['line']) . "\n";
+        $code .= " * Confidence: " . $ability['confidence'] . "\n";
         $code .= " *\n";
         $code .= " * TODO: Review and customize this ability before registering\n";
         $code .= " */\n\n";
 
-        $code .= "wp_register_ability( '" . esc_html($name) . "', array(\n";
-        $code .= "\t'label'       => '" . esc_html($label) . "',\n";
-        $code .= "\t'description' => '" . esc_html($description) . "',\n\n";
+        $code .= "wp_register_ability( '" . $name . "', array(\n";
+        $code .= "\t'label'       => '" . $label . "',\n";
+        $code .= "\t'description' => '" . $description . "',\n\n";
 
         $code .= "\t'input_schema' => array(\n";
         $code .= "\t\t'type'       => 'object',\n";
         $code .= "\t\t'properties' => array(\n";
-        $code .= "\t\t\t// TODO: Define input parameters based on " . esc_html($source_id) . "\n";
+        $code .= "\t\t\t// TODO: Define input parameters based on " . $source_id . "\n";
         $code .= "\t\t),\n";
         $code .= "\t\t'required'   => array(),\n";
         $code .= "\t),\n\n";
@@ -85,7 +85,7 @@ class Abilities_Scout_Draft_Generator
         $code .= "\t\t),\n";
         $code .= "\t),\n\n";
 
-        $code .= "\t'execute_callback'    => '" . esc_html($func_name) . "',\n\n";
+        $code .= "\t'execute_callback'    => '" . $func_name . "',\n\n";
 
         $code .= "\t'permission_callback' => function() {\n";
         $code .= "\t\treturn current_user_can( 'manage_options' );\n";
@@ -93,12 +93,12 @@ class Abilities_Scout_Draft_Generator
         $code .= ") );\n\n";
 
         $code .= "/**\n";
-        $code .= " * Execute callback for " . esc_html($name) . "\n";
+        $code .= " * Execute callback for " . $name . "\n";
         $code .= " *\n";
         $code .= " * @param array \$args Input arguments matching input_schema\n";
         $code .= " * @return array Output matching output_schema\n";
         $code .= " */\n";
-        $code .= "function " . esc_html($func_name) . "( \$args ) {\n";
+        $code .= "function " . $func_name . "( \$args ) {\n";
         $code .= "\t// TODO: Implement ability logic\n";
         $code .= "\treturn array(\n";
         $code .= "\t\t'success' => true,\n";

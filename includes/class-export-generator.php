@@ -119,7 +119,7 @@ class Abilities_Scout_Export_Generator
         $lines[] = '### Registration Pattern';
         $lines[] = '';
         $lines[] = '```php';
-        $lines[] = "add_action( 'abilities_api_init', function() {";
+        $lines[] = "add_action( 'wp_abilities_api_init', function() {";
         $lines[] = "    wp_register_ability( 'namespace/ability-name', array(";
         $lines[] = "        'label'               => __( 'Human-Readable Label', 'text-domain' ),";
         $lines[] = "        'description'          => __( 'What this ability does, for AI agents.', 'text-domain' ),";
