@@ -66,9 +66,9 @@ class Abilities_Scout_Draft_Generator
         $code .= " * TODO: Review and customize this ability before registering\n";
         $code .= " */\n\n";
 
-        $code .= "wp_register_ability( '" . $name . "', array(\n";
-        $code .= "\t'label'       => '" . $label . "',\n";
-        $code .= "\t'description' => '" . $description . "',\n\n";
+        $code .= "wp_register_ability( '" . addslashes($name) . "', array(\n";
+        $code .= "\t'label'       => '" . addslashes($label) . "',\n";
+        $code .= "\t'description' => '" . addslashes($description) . "',\n\n";
 
         $code .= "\t'input_schema' => array(\n";
         $code .= "\t\t'type'       => 'object',\n";
@@ -85,7 +85,7 @@ class Abilities_Scout_Draft_Generator
         $code .= "\t\t),\n";
         $code .= "\t),\n\n";
 
-        $code .= "\t'execute_callback'    => '" . $func_name . "',\n\n";
+        $code .= "\t'execute_callback'    => '" . addslashes($func_name) . "',\n\n";
 
         $code .= "\t'permission_callback' => function() {\n";
         $code .= "\t\treturn current_user_can( 'manage_options' );\n";
@@ -93,7 +93,7 @@ class Abilities_Scout_Draft_Generator
         $code .= ") );\n\n";
 
         $code .= "/**\n";
-        $code .= " * Execute callback for " . $name . "\n";
+        $code .= " * Execute callback for " . addslashes($name) . "\n";
         $code .= " *\n";
         $code .= " * @param array \$args Input arguments matching input_schema\n";
         $code .= " * @return array Output matching output_schema\n";
