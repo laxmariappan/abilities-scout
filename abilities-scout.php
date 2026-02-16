@@ -3,7 +3,7 @@
  * Plugin Name: Abilities Scout
  * Plugin URI: https://github.com/laxmariappan/abilities-scout
  * Description: Scans installed plugins and discovers potential abilities for the WordPress Abilities API. A companion to the Abilities Explorer plugin.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author: Lax Mariappan
@@ -24,7 +24,7 @@ if ( defined( 'ABILITIES_SCOUT_VERSION' ) ) {
 }
 
 // Define plugin constants.
-define( 'ABILITIES_SCOUT_VERSION', '1.0.0' );
+define( 'ABILITIES_SCOUT_VERSION', '1.1.0' );
 define( 'ABILITIES_SCOUT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ABILITIES_SCOUT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'ABILITIES_SCOUT_PLUGIN_FILE', __FILE__ );
