@@ -78,6 +78,14 @@ class Abilities_Scout {
 	 */
 	private function load_dependencies(): void {
 		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-scanner.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-mcp-tools.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-export-generator.php';
+		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-draft-generator.php';
+
+		// Initialize MCP tools (only if Abilities API is available).
+		if ( function_exists( 'wp_register_ability' ) ) {
+			new Abilities_Scout_MCP_Tools();
+		}
 	}
 
 	/**
