@@ -374,7 +374,7 @@ class Abilities_Scout_MCP_Tools
             'low' => 1,
         );
 
-        $min_level = $levels[$threshold];
+        $min_level = $levels[$threshold] ?? 1;
 
         return array_values(
             array_filter(
