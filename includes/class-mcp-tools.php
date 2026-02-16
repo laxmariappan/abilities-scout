@@ -81,6 +81,7 @@ class Abilities_Scout_MCP_Tools
                 'execute_callback' => array($this, 'execute_scan'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'meta' => array(
+                    'show_in_rest' => true,
                     'mcp' => array(
                         'public' => true,
                         'type' => 'tool',
@@ -127,6 +128,7 @@ class Abilities_Scout_MCP_Tools
                 'execute_callback' => array($this, 'execute_export'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'meta' => array(
+                    'show_in_rest' => true,
                     'mcp' => array(
                         'public' => true,
                         'type' => 'tool',
@@ -172,6 +174,7 @@ class Abilities_Scout_MCP_Tools
                 'execute_callback' => array($this, 'execute_draft'),
                 'permission_callback' => array($this, 'check_permissions'),
                 'meta' => array(
+                    'show_in_rest' => true,
                     'mcp' => array(
                         'public' => true,
                         'type' => 'tool',
