@@ -4,7 +4,7 @@ Tags: abilities, ai, abilities-api, plugin-scanner, hooks
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,6 +62,15 @@ No. Scout uses PHP's `token_get_all()` to lexically analyze source code. It only
 Markdown and JSON. The Markdown export includes the full `wp_register_ability()` pattern and is designed to be fed to AI coding tools. The JSON export provides structured data for programmatic use.
 
 == Changelog ==
+
+= 1.1.0 =
+* **New:** MCP (Model Context Protocol) support - AI agents can now interact with Abilities Scout directly
+* **New:** `abilities-scout/scan` ability - Scan plugins and return potential abilities with confidence filtering
+* **New:** `abilities-scout/export` ability - Export scan results in JSON or Markdown format
+* **New:** `abilities-scout/draft` ability - Generate PHP code stubs for registering discovered abilities
+* **Enhancement:** Server-side export generation for programmatic access
+* **Enhancement:** Automatic ability registration when WordPress Abilities API is available
+* **Enhancement:** Graceful degradation - works perfectly without Abilities API or MCP Adapter
 
 = 1.0.0 =
 * Initial release.
