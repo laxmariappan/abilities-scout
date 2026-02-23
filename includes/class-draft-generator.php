@@ -188,19 +188,45 @@ class Abilities_Scout_Draft_Generator
     }
 
     /**
-     * Generate a basic description.
+     * Generate a human-readable description derived from the hook name, route, or shortcode tag.
      *
      * @param array $ability Ability data.
      * @return string Description.
      */
     private function generate_description(array $ability): string
     {
-        $type = $ability['ability_type'];
-        $id = $this->get_source_identifier($ability);
+        $type        = $ability['ability_type'];
+        $source_type = $ability['source_type'];
+        $source      = $ability['source'];
 
-        if ('tool' === $type) {
-            return sprintf('Performs actions related to %s.', $id);
+        if ('shortcode' === $source_type) {
+            return sprintf(
+                'Renders the [%s] shortcode and returns its formatted output.',
+                $source['tag']
+            );
         }
-        return sprintf('Retrieves data from %s.', $id);
+
+        if ('rest_route' === $source_type) {
+            return 'tool' === $type
+                ? sprintf( 'Performs actions at the %s REST endpoint.', $source['full_route'] )
+                : sprintf( 'Retrieves data from the %s REST endpoint.', $source['full_route'] );
+        }
+
+        // Hook: strip plugin namespace prefix and humanize remaining words.
+        $hook_name        = $source['hook_name'];
+        $namespace        = explode( '/', $ability['suggested_name'] )[0];
+        $namespace_prefix = str_replace( '-', '_', $namespace );
+
+        if ( str_starts_with( $hook_name, $namespace_prefix . '_' ) ) {
+            $human = substr( $hook_name, strlen( $namespace_prefix ) + 1 );
+        } else {
+            $human = $hook_name;
+        }
+
+        $human = str_replace( '_', ' ', $human );
+
+        return 'tool' === $type
+            ? ucfirst( $human ) . '.'
+            : 'Returns ' . $human . '.';
     }
 }
