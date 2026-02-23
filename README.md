@@ -12,27 +12,52 @@ Abilities Scout uses PHP tokenization (`token_get_all()`) to read plugin source 
 
 It then **scores every discovery** using a point-based classification engine:
 
-- **REST routes** score highest — they're structured APIs already
-- **Hooks with action verbs** (submit, create, delete, export...) score as tools
-- **Hooks with data verbs** (get, list, check, query...) score as resources
+- **Hooks and shortcodes score highest** as **primitive abilities** — atomic, reusable units that can be discovered, composed, and chained
+- **REST routes are detected as orchestrators** — they should consume and chain abilities, not become them
+- A **REST-adjacent bonus** boosts hooks found in the same file as REST route registrations, since those hooks are likely the primitives that REST endpoint already calls
 - **Infrastructure plumbing** (nonces, enqueue, CSS) is filtered out
 
 The result: a ranked list of potential abilities with suggested names, confidence levels, type classification (tool vs resource), and exact source locations.
 
 ![Potential abilities cards with confidence badges and suggested names](assets/screenshots/abilities.png)
 
-## Export for AI Agents
+## Using with AI Agents
 
-After scanning, export results as **Markdown** or **JSON**.
+Abilities Scout is designed for two distinct AI workflows. Understanding which one you're in changes how you use it.
 
-The Markdown export is designed for AI agent consumption — it includes:
+### Path 1 — MCP (agentic, live site)
 
-- The full `wp_register_ability()` registration pattern
-- All required arguments (label, description, input/output schema, callbacks)
-- Every discovered ability grouped by confidence
-- Source hook names, file paths, and line numbers
+If your AI agent is connected to your WordPress site via the [Model Context Protocol](https://modelcontextprotocol.io/), Abilities Scout registers two abilities the agent can call directly:
 
-Hand it to Claude, Cursor, or any AI coding tool and say *"build these abilities."*
+| Ability | What it does |
+|---------|--------------|
+| `abilities-scout/scan` | Scans a plugin and returns structured results: primitives, orchestrators, confidence scores, source locations |
+| `abilities-scout/draft` | Returns pre-formatted `wp_register_ability()` stubs for primitive abilities only |
+
+**In a fully agentic flow, skip `draft` and act on `scan` directly.**
+
+The agent already has the scan results — hook names, file paths, line numbers, roles. It can open those source files, read the actual function signatures, and write a complete, accurate implementation. Draft stubs are an extra hop that produces less context than reading the source.
+
+```
+AI agent → abilities-scout/scan → reads source files → writes real code
+```
+
+`abilities-scout/draft` is still useful as a **"show me before you touch anything"** gate — some workflows want the agent to surface what it would generate for human review before writing to disk.
+
+### Path 2 — Export (offline, IDE-based)
+
+When you're working in Claude.ai, Cursor, or any AI coding tool that isn't connected to your live site, use the export buttons after scanning:
+
+- **Markdown export** — structured prose with primitives and orchestrators separated, `wp_register_ability()` stubs, source locations, and a "your task" summary. Paste directly into a chat or attach to a prompt.
+- **JSON export** — machine-readable, schema-versioned (`abilities-scout/v1.2`), with `primitives[]` and `orchestrators[]` arrays. Feed to agents that consume structured tool output.
+
+Hand either to an AI coding tool and say *"build these abilities."*
+
+```
+Export → paste to Claude / Cursor → AI writes code from stubs + context
+```
+
+The stubs carry the right semantics (hook name, schema shape, source location) so the AI has grounding even without live site access. The AI reformats to match your project's coding style.
 
 | Markdown Export | JSON Export |
 |:-:|:-:|
@@ -56,26 +81,50 @@ Works standalone or as a companion to [Abilities Explorer](https://github.com/de
 
 | Signal | Points | Why |
 |--------|--------|-----|
-| REST route | +50 | Already a structured API |
-| Shortcode | +30 | Template-level ability |
-| Action verb in hook name | +20 | Actionable functionality |
-| Plugin-namespaced hook | +15 | Plugin's own API surface |
-| 2+ parameters | +10 | Data transformation |
-| 1 parameter | +5 | Data flow |
-| Static hook name | +5 | Predictable, reliable |
-| Infrastructure pattern | -30 | UI/admin plumbing |
-| Dynamic hook name | -10 | Unpredictable at runtime |
+| Hook: action verb in name | +20 | Actionable primitive |
+| Hook: plugin-namespaced | +15 | Plugin's own API surface |
+| Hook: 2+ parameters | +10 | Data transformation |
+| Hook: 1 parameter | +5 | Data flow |
+| Hook: static name | +5 | Predictable, reliable |
+| Hook: REST-adjacent file | +20 | Likely consumed by a REST orchestrator |
+| Hook: infrastructure pattern | -30 | UI/admin plumbing |
+| Hook: dynamic name | -10 | Unpredictable at runtime |
+| REST route (base) | +20 | Orchestration layer — should consume abilities |
+| REST route: plugin-namespaced | +15 | Plugin's own endpoint |
+| REST route: no regex params | +5 | Static endpoint |
+| Shortcode | +30 | Template-level primitive |
+| Shortcode: plugin-namespaced | +15 | Plugin's own shortcode |
 
-**Confidence levels:** High (60+), Medium (30-59), Low (1-29)
+**Confidence levels:** High (60+), Medium (30–59), Low (1–29)
+
+REST routes max out at 40 (medium) by design — they are orchestrators, not primitives.
+
+## Abilities as Primitives
+
+The WordPress Abilities API is designed for **composability**. Abilities work best as small, atomic units — primitives that can be discovered, composed, and chained by AI agents and other tools.
+
+**REST endpoints are orchestrators.** They receive HTTP requests, coordinate multiple operations, and return structured responses. The right pattern is:
+
+```
+REST endpoint → calls/chains → wp_register_ability() primitives
+```
+
+Abilities Scout reflects this by:
+
+- **Scoring hooks and shortcodes higher** — these are your primitive candidates
+- **Flagging REST endpoints as orchestrators** — with a recommendation to consume abilities rather than become them
+- **Surfacing REST-adjacent hooks** — hooks found in the same file as REST route registrations score an extra +20 because they're likely the primitives that REST endpoint already calls
+
+The exported Markdown separates **Primitive Abilities** from **REST Orchestrators**, making it clear to AI agents what to register vs. what to refactor.
 
 ## Example Results
 
 **Akismet** — 22 files, 10ms:
-- 6 high-confidence abilities (REST routes: alert, key, settings, stats, webhook)
-- 17 medium-confidence abilities (submit spam, delete batch, comment check)
+- Medium-confidence REST orchestrators (alert, key, settings, stats, webhook endpoints)
+- 17 medium-confidence primitive abilities (submit spam, delete batch, comment check hooks)
 
 **WP Crontrol** — 11 files, 6ms:
-- 12 medium-confidence abilities (schedule management, event editing)
+- 12 medium-confidence primitive abilities (schedule management, event editing hooks)
 
 **Plugin Check (PCP)** — 116 files, 35ms:
 - 11 potential abilities (check categories, ignored warnings, restricted contributors)
