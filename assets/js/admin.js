@@ -174,9 +174,15 @@
 		// =====================================================================
 
 		renderPotentialAbilities: function(abilities) {
-			// Only show high and medium confidence.
+			// Split by role: primitives (hooks/shortcodes) vs orchestrators (REST routes).
 			const meaningful = abilities.filter(function(a) {
 				return a.confidence === 'high' || a.confidence === 'medium';
+			});
+			const primitives = meaningful.filter(function(a) {
+				return a.role === 'primitive' || !a.role;
+			});
+			const orchestrators = meaningful.filter(function(a) {
+				return a.role === 'orchestrator';
 			});
 
 			let html = '<div class="abilities-scout-section">';
@@ -189,26 +195,53 @@
 				return html;
 			}
 
-			html += '<p class="description">These hooks and routes scored highest as potential abilities based on naming patterns, parameter counts, and API structure.</p>';
-			html += '<div class="abilities-scout-ability-grid">';
+			// --- Primitive Abilities ---
+			if (primitives.length > 0) {
+				html += '<h4 class="abilities-scout-role-heading">Primitive Abilities <span class="abilities-scout-role-count">(' + primitives.length + ')</span></h4>';
+				html += '<p class="description">These hooks and shortcodes are atomic, reusable units — register these as abilities using <code>wp_register_ability()</code>.</p>';
+				html += '<div class="abilities-scout-ability-grid">';
+				primitives.forEach(function(ability) {
+					html += AbilitiesScout.renderAbilityCard(ability);
+				});
+				html += '</div>';
+			}
 
-			meaningful.forEach(function(ability) {
-				html += AbilitiesScout.renderAbilityCard(ability);
-			});
+			// --- REST Orchestrators ---
+			if (orchestrators.length > 0) {
+				html += '<h4 class="abilities-scout-role-heading abilities-scout-role-heading-orchestrator">REST Endpoints <span class="abilities-scout-role-count">(' + orchestrators.length + ')</span></h4>';
+				html += '<div class="abilities-scout-orchestrator-notice">' +
+					'<strong>Architectural note:</strong> These REST endpoints are <em>orchestration layers</em> — ' +
+					'they should <strong>consume and chain abilities</strong> rather than become one. ' +
+					'Register the primitive abilities above, then call them from these endpoints.' +
+					'</div>';
+				html += '<div class="abilities-scout-ability-grid">';
+				orchestrators.forEach(function(ability) {
+					html += AbilitiesScout.renderAbilityCard(ability);
+				});
+				html += '</div>';
+			}
 
-			html += '</div></div>';
+			html += '</div>';
 			return html;
 		},
 
 		renderAbilityCard: function(ability) {
-			let html = '<div class="abilities-scout-ability-card">';
+			const isOrchestrator = ability.role === 'orchestrator';
+			let html = '<div class="abilities-scout-ability-card' + (isOrchestrator ? ' scout-card-orchestrator' : '') + '">';
 
 			// Badges row.
 			html += '<div class="abilities-scout-card-badges">';
 			html += '<span class="scout-badge scout-badge-' + this.escapeHtml(ability.confidence) + '">' +
 				this.escapeHtml(ability.confidence) + '</span>';
-			html += '<span class="scout-badge scout-type-' + this.escapeHtml(ability.ability_type) + '">' +
-				this.escapeHtml(ability.ability_type) + '</span>';
+			if (isOrchestrator) {
+				html += '<span class="scout-badge scout-role-orchestrator">orchestrator</span>';
+			} else {
+				html += '<span class="scout-badge scout-type-' + this.escapeHtml(ability.ability_type) + '">' +
+					this.escapeHtml(ability.ability_type) + '</span>';
+				if (ability.rest_adjacent) {
+					html += '<span class="scout-badge scout-badge-rest-adjacent">REST adjacent</span>';
+				}
+			}
 			html += '<span class="scout-badge scout-source-' + this.escapeHtml(ability.source_type) + '">' +
 				this.escapeHtml(ability.source_type.replace('_', ' ')) + '</span>';
 			html += '</div>';
@@ -508,7 +541,7 @@
 			var discovered = data.discovered;
 
 			var exportData = {
-				'$schema': 'abilities-scout/v1',
+				'$schema': 'abilities-scout/v1.2',
 				'generator': 'Abilities Scout ' + (abilitiesScout.version || '1.0.0'),
 				'exported_at': new Date().toISOString(),
 				'plugin': {
@@ -528,11 +561,29 @@
 					'potential_abilities_count': discovered.stats.potential_abilities_count,
 					'scan_time_ms': discovered.stats.scan_time_ms
 				},
-				'potential_abilities': (discovered.potential_abilities || []).map(function(a) {
+				'primitives': (discovered.potential_abilities || []).filter(function(a) {
+					return a.role === 'primitive' || !a.role;
+				}).map(function(a) {
 					return {
 						'suggested_name': a.suggested_name,
 						'label': a.label,
 						'ability_type': a.ability_type,
+						'role': a.role || 'primitive',
+						'rest_adjacent': a.rest_adjacent || false,
+						'confidence': a.confidence,
+						'score': a.score,
+						'source_type': a.source_type,
+						'source': a.source
+					};
+				}),
+				'orchestrators': (discovered.potential_abilities || []).filter(function(a) {
+					return a.role === 'orchestrator';
+				}).map(function(a) {
+					return {
+						'suggested_name': a.suggested_name,
+						'label': a.label,
+						'role': 'orchestrator',
+						'recommendation': a.recommendation || '',
 						'confidence': a.confidence,
 						'score': a.score,
 						'source_type': a.source_type,
@@ -594,53 +645,53 @@
 			lines.push('### Registration Pattern');
 			lines.push('');
 			lines.push('```php');
-			lines.push("add_action( 'abilities_api_init', function() {");
+			lines.push("// Step 1: Register a category (once per plugin, in wp_abilities_api_categories_init).");
+			lines.push("add_action( 'wp_abilities_api_categories_init', function() {");
+			lines.push("    wp_register_ability_category( 'namespace', array(");
+			lines.push("        'label'       => __( 'My Plugin', 'text-domain' ),");
+			lines.push("        'description' => __( 'Abilities provided by My Plugin.', 'text-domain' ),");
+			lines.push("    ) );");
+			lines.push("} );");
+			lines.push('');
+			lines.push("// Step 2: Register each ability in wp_abilities_api_init.");
+			lines.push("add_action( 'wp_abilities_api_init', function() {");
 			lines.push("    wp_register_ability( 'namespace/ability-name', array(");
-			lines.push("        'label'               => __( 'Human-Readable Label', 'text-domain' ),");
-			lines.push("        'description'          => __( 'What this ability does, for AI agents.', 'text-domain' ),");
-			lines.push("        'input_schema'         => array(");
+			lines.push("        'label'       => __( 'Human-Readable Label', 'text-domain' ),");
+			lines.push("        'description' => __( 'What this ability does, for AI agents.', 'text-domain' ),");
+			lines.push("        'category'    => 'namespace', // required");
+			lines.push("        'input_schema' => array(");
 			lines.push("            'type'       => 'object',");
-			lines.push("            'properties' => array(");
-			lines.push("                'param_name' => array(");
-			lines.push("                    'type'        => 'string',");
-			lines.push("                    'description' => 'Parameter description',");
-			lines.push("                ),");
-			lines.push("            ),");
-			lines.push("            'required'             => array( 'param_name' ),");
-			lines.push("            'additionalProperties' => false,");
+			lines.push("            'properties' => array( /* ... */ ),");
+			lines.push("            'required'   => array( 'param_name' ),");
 			lines.push("        ),");
-			lines.push("        'output_schema'        => array(");
+			lines.push("        'output_schema' => array(");
 			lines.push("            'type'       => 'object',");
-			lines.push("            'properties' => array(");
-			lines.push("                'result' => array(");
-			lines.push("                    'type'        => 'string',");
-			lines.push("                    'description' => 'Result description',");
-			lines.push("                ),");
-			lines.push("            ),");
+			lines.push("            'properties' => array( /* ... */ ),");
 			lines.push("        ),");
-			lines.push("        'execute_callback'     => 'my_execute_function',");
-			lines.push("        'permission_callback'  => function() {");
-			lines.push("            return current_user_can( 'manage_options' );");
-			lines.push("        },");
+			lines.push("        'execute_callback'    => static function( array \$input ) { /* ... */ },");
+			lines.push("        'permission_callback' => function() { return current_user_can( 'manage_options' ); },");
+			lines.push("        'meta' => array( 'show_in_rest' => true ),");
 			lines.push("    ) );");
 			lines.push("} );");
 			lines.push('```');
 			lines.push('');
-			lines.push('**Required arguments:** `label`, `description`, `input_schema`, `output_schema`, `execute_callback`');
+			lines.push('**Required:** `label`, `description`, `category`, `input_schema`, `output_schema`, `execute_callback`');
 			lines.push('');
-			lines.push('**Optional:** `permission_callback` (defaults to true), `meta` (arbitrary metadata array)');
+			lines.push('**Optional:** `permission_callback`, `meta` — set `show_in_rest: true` to expose via REST/MCP');
 			lines.push('');
-			lines.push('**Ability Name Pattern:** `namespace/ability-name` (lowercase alphanumeric + hyphens, exactly one forward slash)');
+			lines.push('**Ability Name Pattern:** `namespace/ability-name` (lowercase, hyphens, one slash)');
 			lines.push('');
-			lines.push('**Ability Types:**');
-			lines.push('- **tool** -- Performs an action (create, update, delete, send, etc.)');
+			lines.push('**Ability Types (internal classification):**');
+			lines.push('- **tool** — Performs an action (create, update, delete, send, etc.)');
 			lines.push('- **resource** -- Returns data (get, list, check, query, etc.)');
 			lines.push('');
-			lines.push('### Your Task');
+			lines.push('### Abilities as Primitives');
 			lines.push('');
-			lines.push('Use the potential abilities listed below to generate `wp_register_ability()` code for the ' +
-				info.name + ' plugin. Each entry includes a suggested name, type, confidence score, and the source ' +
-				'hook/route/shortcode it was derived from. High-confidence items are the strongest candidates.');
+			lines.push('**Key architectural principle:** Abilities are primitives — atomic, reusable units. REST endpoints are orchestrators that should *consume* and *chain* abilities, not become them.');
+			lines.push('');
+			lines.push('- **Register the hooks and shortcodes** (listed as "Primitive Abilities" below) as `wp_register_ability()` entries');
+			lines.push('- **Update the REST endpoints** (listed as "REST Orchestrators" below) to call those abilities via the Abilities API');
+			lines.push('- This makes your plugin composable: AI agents and other plugins can invoke individual abilities directly');
 			lines.push('');
 
 			// Scan Summary.
@@ -662,46 +713,50 @@
 			}
 			lines.push('');
 
-			// Potential Abilities.
+			// Potential Abilities — split into primitives and orchestrators.
 			lines.push('---');
 			lines.push('');
-			lines.push('## Potential Abilities');
+			lines.push('## Primitive Abilities');
+			lines.push('');
+			lines.push('> Register these hooks and shortcodes as `wp_register_ability()` entries — they are atomic, reusable units.');
 			lines.push('');
 
-			if (abilities.length === 0) {
-				lines.push('No potential abilities were discovered in this plugin.');
+			var primitives = abilities.filter(function(a) { return a.role === 'primitive' || !a.role; });
+			var orchestrators = abilities.filter(function(a) { return a.role === 'orchestrator'; });
+
+			if (primitives.length === 0) {
+				lines.push('No primitive abilities were discovered in this plugin.');
 				lines.push('');
 			} else {
-				var groups = { high: [], medium: [], low: [] };
-				abilities.forEach(function(a) {
-					if (groups[a.confidence]) {
-						groups[a.confidence].push(a);
+				var primGroups = { high: [], medium: [], low: [] };
+				primitives.forEach(function(a) {
+					if (primGroups[a.confidence]) {
+						primGroups[a.confidence].push(a);
 					}
 				});
 
-				var self = this;
 				['high', 'medium', 'low'].forEach(function(level) {
-					if (groups[level].length === 0) {
+					if (primGroups[level].length === 0) {
 						return;
 					}
 
 					lines.push('### ' + level.charAt(0).toUpperCase() + level.slice(1) +
-						' Confidence (' + groups[level].length + ')');
+						' Confidence (' + primGroups[level].length + ')');
 					lines.push('');
 
-					groups[level].forEach(function(ability) {
+					primGroups[level].forEach(function(ability) {
 						lines.push('#### ' + ability.label);
 						lines.push('');
 						lines.push('- **Suggested Name:** `' + ability.suggested_name + '`');
 						lines.push('- **Type:** ' + ability.ability_type);
+						lines.push('- **Role:** primitive');
+						if (ability.rest_adjacent) {
+							lines.push('- **REST Adjacent:** yes — this hook is in the same file as a REST route registration');
+						}
 						lines.push('- **Confidence:** ' + ability.confidence + ' (score: ' + ability.score + ')');
 						lines.push('- **Source Type:** ' + ability.source_type.replace('_', ' '));
 
-						if (ability.source_type === 'rest_route') {
-							lines.push('- **REST Route:** `' + ability.source.full_route + '`');
-							lines.push('- **Namespace:** `' + ability.source.namespace + '`');
-							lines.push('- **Route Pattern:** `' + ability.source.route + '`');
-						} else if (ability.source_type === 'shortcode') {
+						if (ability.source_type === 'shortcode') {
 							lines.push('- **Shortcode:** `[' + ability.source.tag + ']`');
 						} else {
 							lines.push('- **Hook:** `' + ability.source.hook_name + '`');
@@ -711,6 +766,44 @@
 							}
 						}
 
+						lines.push('- **File:** `' + ability.source.file + ':' + ability.source.line + '`');
+						lines.push('');
+					});
+				});
+			}
+
+			// REST Orchestrators.
+			if (orchestrators.length > 0) {
+				lines.push('---');
+				lines.push('');
+				lines.push('## REST Orchestrators');
+				lines.push('');
+				lines.push('> These REST endpoints are **orchestration layers**. They should *call* the primitive abilities above rather than become abilities themselves.');
+				lines.push('');
+
+				var orchGroups = { high: [], medium: [], low: [] };
+				orchestrators.forEach(function(a) {
+					if (orchGroups[a.confidence]) {
+						orchGroups[a.confidence].push(a);
+					}
+				});
+
+				['high', 'medium', 'low'].forEach(function(level) {
+					if (orchGroups[level].length === 0) {
+						return;
+					}
+
+					lines.push('### ' + level.charAt(0).toUpperCase() + level.slice(1) +
+						' (' + orchGroups[level].length + ')');
+					lines.push('');
+
+					orchGroups[level].forEach(function(ability) {
+						lines.push('#### ' + ability.label);
+						lines.push('');
+						lines.push('- **Role:** orchestrator');
+						lines.push('- **REST Route:** `' + ability.source.full_route + '`');
+						lines.push('- **Namespace:** `' + ability.source.namespace + '`');
+						lines.push('- **Route Pattern:** `' + ability.source.route + '`');
 						lines.push('- **File:** `' + ability.source.file + ':' + ability.source.line + '`');
 						lines.push('');
 					});

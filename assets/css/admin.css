@@ -293,6 +293,62 @@
 	border: 1px solid #cdb8f0;
 }
 
+/* Role Badges */
+.scout-role-orchestrator {
+	background: #fff3e0;
+	color: #b45309;
+	border: 1px solid #f0c060;
+}
+
+.scout-badge-rest-adjacent {
+	background: #e6f7f7;
+	color: #0e7490;
+	border: 1px solid #a0d4d9;
+}
+
+/* Orchestrator Section */
+.abilities-scout-orchestrator-notice {
+	background: #fff8e1;
+	border: 1px solid #f0c060;
+	border-left: 4px solid #b45309;
+	border-radius: 4px;
+	padding: 12px 16px;
+	margin-bottom: 16px;
+	font-size: 13px;
+	color: #3c2e00;
+	line-height: 1.5;
+}
+
+.scout-card-orchestrator {
+	border-color: #f0c060;
+	background: #fffdf5;
+}
+
+.scout-card-orchestrator:hover {
+	border-color: #b45309;
+}
+
+
+/* Role Section Headings */
+.abilities-scout-role-heading {
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	margin: 20px 0 8px;
+	padding-bottom: 6px;
+	border-bottom: 2px solid #2271b1;
+}
+
+.abilities-scout-role-heading-orchestrator {
+	border-bottom-color: #b45309;
+	margin-top: 32px;
+}
+
+.abilities-scout-role-count {
+	font-weight: 400;
+	color: #646970;
+}
+
 /* Source Type Badges */
 .scout-source-action {
 	background: #f6f7f7;
