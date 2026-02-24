@@ -285,7 +285,7 @@ class Abilities_Scout_Scanner {
 				'total_routes'             => count( $this->rest_routes ),
 				'total_shortcodes'         => count( $this->shortcodes ),
 				'potential_abilities_count' => count( $potential_abilities ),
-				'scan_time_ms'             => round( ( $end_time - $start_time ) * 1000, 1 ),
+				'scan_time_ms'             => (int) round( ( $end_time - $start_time ) * 1000 ),
 			),
 		);
 	}
