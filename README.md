@@ -155,6 +155,10 @@ If Abilities Scout is useful to you:
 - 🐛 **Open an issue** — Feature requests and bug reports both help improve the tool
 - 🤝 **Contribute** — Code, docs, or testing — every bit counts
 
+## Credits
+
+Thanks to [David Levine](https://github.com/justlevine) for recommending the primitives-first approach — the idea that hooks and shortcodes should score as primitive ability candidates while REST routes are treated as orchestration layers shaped the core scoring philosophy in v1.2.0.
+
 ## License
 
 GPL v2 or later. See [LICENSE](https://www.gnu.org/licenses/gpl-2.0.html).
