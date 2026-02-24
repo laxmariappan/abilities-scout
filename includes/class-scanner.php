@@ -151,6 +151,18 @@ class Abilities_Scout_Scanner {
 		'in_admin_header',
 		'wp_before_admin_bar_render',
 		'wp_after_admin_bar_render',
+		// Comment lifecycle — core hooks, not plugin primitives.
+		'delete_comment',
+		'deleted_comment',
+		'trash_comment',
+		'trashed_comment',
+		'untrash_comment',
+		'untrashed_comment',
+		'wp_insert_comment',
+		'comment_post',
+		'edit_comment',
+		'pre_comment_approved',
+		'comment_flood_trigger',
 	);
 
 	/**
@@ -182,6 +194,15 @@ class Abilities_Scout_Scanner {
 	private array $shortcodes = array();
 
 	/**
+	 * Files that contain REST route registrations (keyed by relative path).
+	 * Used to detect hooks in the same file as a REST route — strong signal
+	 * that the hook is a primitive being consumed by that REST orchestrator.
+	 *
+	 * @var array<string, bool>
+	 */
+	private array $rest_route_files = array();
+
+	/**
 	 * Files scanned count.
 	 */
 	private int $files_scanned = 0;
@@ -211,13 +232,14 @@ class Abilities_Scout_Scanner {
 		$start_time = microtime( true );
 
 		// Reset state.
-		$this->actions       = array();
-		$this->filters       = array();
-		$this->rest_routes   = array();
-		$this->shortcodes    = array();
-		$this->files_scanned = 0;
-		$this->files_errored = 0;
-		$this->truncated     = false;
+		$this->actions          = array();
+		$this->filters          = array();
+		$this->rest_routes      = array();
+		$this->shortcodes       = array();
+		$this->rest_route_files = array();
+		$this->files_scanned    = 0;
+		$this->files_errored    = 0;
+		$this->truncated        = false;
 
 		// Find PHP files.
 		$files = $this->find_php_files( $plugin_dir );
@@ -263,7 +285,7 @@ class Abilities_Scout_Scanner {
 				'total_routes'             => count( $this->rest_routes ),
 				'total_shortcodes'         => count( $this->shortcodes ),
 				'potential_abilities_count' => count( $potential_abilities ),
-				'scan_time_ms'             => round( ( $end_time - $start_time ) * 1000, 1 ),
+				'scan_time_ms'             => (int) round( ( $end_time - $start_time ) * 1000 ),
 			),
 		);
 	}
@@ -603,6 +625,10 @@ class Abilities_Scout_Scanner {
 			'file'       => $relative_path,
 			'line'       => $line,
 		);
+
+		// Track this file as containing REST route registrations.
+		// Hooks found in the same file are likely primitives consumed by this endpoint.
+		$this->rest_route_files[ $relative_path ] = true;
 	}
 
 	/**
@@ -806,7 +832,7 @@ class Abilities_Scout_Scanner {
 	private function classify_discoveries( string $plugin_slug ): array {
 		$abilities = array();
 
-		// Score REST routes (always high value).
+		// Score REST routes (orchestration layer — lower priority than hook primitives).
 		foreach ( $this->rest_routes as $route ) {
 			$score = $this->score_rest_route( $route, $plugin_slug );
 			if ( $score > 0 ) {
@@ -885,6 +911,12 @@ class Abilities_Scout_Scanner {
 			$score -= 30;
 		}
 
+		// REST-adjacent primitive bonus: hook is in the same file as a REST route registration.
+		// Strong signal this hook is a primitive being consumed by that REST orchestrator.
+		if ( isset( $this->rest_route_files[ $hook['file'] ] ) ) {
+			$score += 20;
+		}
+
 		return $score;
 	}
 
@@ -896,8 +928,10 @@ class Abilities_Scout_Scanner {
 	 * @return int Score.
 	 */
 	private function score_rest_route( array $route, string $plugin_slug ): int {
-		// REST routes are always high value.
-		$score = 50;
+		// REST routes are orchestration layers, not primitives.
+		// They should consume/chain abilities rather than become them.
+		// Score is intentionally lower than well-qualified hook primitives.
+		$score = 20;
 
 		// Plugin-namespaced bonus.
 		$ns_lower = strtolower( $route['namespace'] ?? '' );
@@ -930,6 +964,11 @@ class Abilities_Scout_Scanner {
 			$score += 15;
 		}
 
+		// REST-adjacent primitive bonus.
+		if ( isset( $this->rest_route_files[ $shortcode['file'] ] ) ) {
+			$score += 20;
+		}
+
 		return $score;
 	}
 
@@ -958,6 +997,8 @@ class Abilities_Scout_Scanner {
 			'suggested_name' => $suggested_name,
 			'label'          => $label,
 			'ability_type'   => 'resource',
+			'role'           => 'orchestrator',
+			'recommendation' => 'This REST endpoint should consume/chain abilities rather than become one. Register atomic hooks in this file as primitive abilities, then call them from this endpoint.',
 			'confidence'     => $this->score_to_confidence( $score ),
 			'score'          => $score,
 			'source_type'    => 'rest_route',
@@ -996,6 +1037,8 @@ class Abilities_Scout_Scanner {
 			'suggested_name' => $suggested_name,
 			'label'          => $label,
 			'ability_type'   => $ability_type,
+			'role'           => 'primitive',
+			'rest_adjacent'  => isset( $this->rest_route_files[ $hook['file'] ] ),
 			'confidence'     => $this->score_to_confidence( $score ),
 			'score'          => $score,
 			'source_type'    => $hook_type,
@@ -1030,6 +1073,8 @@ class Abilities_Scout_Scanner {
 			'suggested_name' => $suggested_name,
 			'label'          => $label,
 			'ability_type'   => 'tool',
+			'role'           => 'primitive',
+			'rest_adjacent'  => isset( $this->rest_route_files[ $shortcode['file'] ] ),
 			'confidence'     => $this->score_to_confidence( $score ),
 			'score'          => $score,
 			'source_type'    => 'shortcode',

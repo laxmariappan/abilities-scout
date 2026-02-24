@@ -73,9 +73,77 @@ class Abilities_Scout_MCP_Tools
                 'output_schema' => array(
                     'type' => 'object',
                     'properties' => array(
-                        'plugin_info' => array('type' => 'object'),
-                        'potential_abilities' => array('type' => 'array'),
-                        'stats' => array('type' => 'object'),
+                        'plugin_info' => array(
+                            'type'        => 'object',
+                            'description' => 'Basic metadata about the scanned plugin.',
+                            'properties'  => array(
+                                'name'    => array( 'type' => 'string' ),
+                                'version' => array( 'type' => 'string' ),
+                                'author'  => array( 'type' => 'string' ),
+                                'url'     => array( 'type' => 'string' ),
+                            ),
+                        ),
+                        'potential_abilities' => array(
+                            'type'        => 'array',
+                            'description' => 'Ranked list of discovered hooks, routes, and shortcodes. Filter by role: primitive (register as abilities) or orchestrator (should consume abilities).',
+                            'items'       => array(
+                                'type'       => 'object',
+                                'properties' => array(
+                                    'suggested_name' => array(
+                                        'type'        => 'string',
+                                        'description' => 'Suggested ability name in namespace/ability-name format.',
+                                    ),
+                                    'label'          => array( 'type' => 'string' ),
+                                    'ability_type'   => array(
+                                        'type'        => 'string',
+                                        'enum'        => array( 'tool', 'resource' ),
+                                        'description' => 'tool = performs an action; resource = returns data.',
+                                    ),
+                                    'role'           => array(
+                                        'type'        => 'string',
+                                        'enum'        => array( 'primitive', 'orchestrator' ),
+                                        'description' => 'primitive = register as wp_register_ability(); orchestrator = REST endpoint that should consume abilities.',
+                                    ),
+                                    'rest_adjacent'  => array(
+                                        'type'        => 'boolean',
+                                        'description' => 'True if this hook is in the same file as a REST route registration — likely already called by that endpoint.',
+                                    ),
+                                    'confidence'     => array(
+                                        'type' => 'string',
+                                        'enum' => array( 'high', 'medium', 'low' ),
+                                    ),
+                                    'score'          => array( 'type' => 'integer' ),
+                                    'source_type'    => array(
+                                        'type' => 'string',
+                                        'enum' => array( 'action', 'filter', 'rest_route', 'shortcode' ),
+                                    ),
+                                    'source'         => array(
+                                        'type'        => 'object',
+                                        'description' => 'Exact location in source code.',
+                                        'properties'  => array(
+                                            'file'        => array( 'type' => 'string' ),
+                                            'line'        => array( 'type' => 'integer' ),
+                                            'hook_name'   => array( 'type' => 'string', 'description' => 'For action/filter sources.' ),
+                                            'full_route'  => array( 'type' => 'string', 'description' => 'For rest_route sources.' ),
+                                            'tag'         => array( 'type' => 'string', 'description' => 'For shortcode sources.' ),
+                                            'param_count' => array( 'type' => 'integer' ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                        'stats' => array(
+                            'type'       => 'object',
+                            'description' => 'Scan statistics.',
+                            'properties' => array(
+                                'files_scanned'             => array( 'type' => 'integer' ),
+                                'total_hooks'               => array( 'type' => 'integer' ),
+                                'total_routes'              => array( 'type' => 'integer' ),
+                                'total_shortcodes'          => array( 'type' => 'integer' ),
+                                'potential_abilities_count' => array( 'type' => 'integer' ),
+                                'scan_time_ms'              => array( 'type' => 'integer' ),
+                            ),
+                        ),
                     ),
                 ),
                 'execute_callback' => array($this, 'execute_scan'),
