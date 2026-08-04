@@ -1,10 +1,10 @@
-# Contributing to Abilities Scout
+# Contributing to Lax Abilities Scout
 
 Thanks for your interest in contributing! Here's how you can help.
 
 ## Reporting Issues
 
-- Use the [GitHub Issues](https://github.com/laxmariappan/abilities-scout/issues) page
+- Use the [GitHub Issues](https://github.com/laxmariappan/lax-abilities-scout/issues) page
 - Include your WordPress version, PHP version, and the plugin you were scanning
 - Describe what you expected vs what happened
 
@@ -25,7 +25,7 @@ Thanks for your interest in contributing! Here's how you can help.
 
 ### Testing
 
-1. Install Abilities Scout on a WordPress site
+1. Install Lax Abilities Scout on a WordPress site
 2. Scan a few plugins (both small and large) to verify results
 3. Test with and without Abilities Explorer active
 

@@ -5,14 +5,14 @@
  * Static code analysis engine that scans plugin PHP files
  * to discover hooks, REST routes, and shortcodes using token_get_all().
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Abilities_Scout_Scanner {
+class Lax_Abilities_Scout_Scanner {
 
 	/**
 	 * Maximum number of files to scan per plugin.

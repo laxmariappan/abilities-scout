@@ -1,10 +1,10 @@
 <?php
 /**
- * Abilities Scout Uninstall
+ * Lax Abilities Scout Uninstall
  *
  * Fired when the plugin is uninstalled.
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {

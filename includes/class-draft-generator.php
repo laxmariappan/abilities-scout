@@ -4,14 +4,14 @@
  *
  * Generates PHP code stubs for registering abilities.
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Abilities_Scout_Draft_Generator
+class Lax_Abilities_Scout_Draft_Generator
 {
 
     /**
@@ -64,7 +64,7 @@ class Abilities_Scout_Draft_Generator
 
         $code = "<?php\n";
         $code .= "/**\n";
-        $code .= " * Auto-generated ability stub by Abilities Scout\n";
+        $code .= " * Auto-generated ability stub by Lax Abilities Scout\n";
         $code .= " *\n";
         $code .= " * Source Hook: " . $source_id . "\n";
         $code .= " * File: " . $source['file'] . ":" . intval($source['line']) . "\n";

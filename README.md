@@ -1,14 +1,14 @@
-# Abilities Scout
+# Lax Abilities Scout
 
 Scan any installed WordPress plugin and discover potential abilities for the [Abilities API](https://developer.wordpress.org/apis/abilities/) (WP 6.9+).
 
 One click. Static analysis. No code execution.
 
-![Abilities Scout — scan results dashboard](assets/screenshots/scan-results.png)
+![Lax Abilities Scout — scan results dashboard](assets/screenshots/scan-results.png)
 
 ## What It Does
 
-Abilities Scout uses PHP tokenization (`token_get_all()`) to read plugin source code and surface hooks, REST routes, and shortcodes that could become AI-callable abilities.
+Lax Abilities Scout uses PHP tokenization (`token_get_all()`) to read plugin source code and surface hooks, REST routes, and shortcodes that could become AI-callable abilities.
 
 It then **scores every discovery** using a point-based classification engine:
 
@@ -23,33 +23,33 @@ The result: a ranked list of potential abilities with suggested names, confidenc
 
 ## Using with AI Agents
 
-Abilities Scout is designed for two distinct AI workflows. Understanding which one you're in changes how you use it.
+Lax Abilities Scout is designed for two distinct AI workflows. Understanding which one you're in changes how you use it.
 
 ### Path 1 — MCP (agentic, live site)
 
-If your AI agent is connected to your WordPress site via the [Model Context Protocol](https://modelcontextprotocol.io/), Abilities Scout registers two abilities the agent can call directly:
+If your AI agent is connected to your WordPress site via the [Model Context Protocol](https://modelcontextprotocol.io/), Lax Abilities Scout registers two abilities the agent can call directly:
 
 | Ability | What it does |
 |---------|--------------|
-| `abilities-scout/scan` | Scans a plugin and returns structured results: primitives, orchestrators, confidence scores, source locations |
-| `abilities-scout/draft` | Returns pre-formatted `wp_register_ability()` stubs for primitive abilities only |
+| `lax-abilities-scout/scan` | Scans a plugin and returns structured results: primitives, orchestrators, confidence scores, source locations |
+| `lax-abilities-scout/draft` | Returns pre-formatted `wp_register_ability()` stubs for primitive abilities only |
 
 **In a fully agentic flow, skip `draft` and act on `scan` directly.**
 
 The agent already has the scan results — hook names, file paths, line numbers, roles. It can open those source files, read the actual function signatures, and write a complete, accurate implementation. Draft stubs are an extra hop that produces less context than reading the source.
 
 ```
-AI agent → abilities-scout/scan → reads source files → writes real code
+AI agent → lax-abilities-scout/scan → reads source files → writes real code
 ```
 
-`abilities-scout/draft` is still useful as a **"show me before you touch anything"** gate — some workflows want the agent to surface what it would generate for human review before writing to disk.
+`lax-abilities-scout/draft` is still useful as a **"show me before you touch anything"** gate — some workflows want the agent to surface what it would generate for human review before writing to disk.
 
 ### Path 2 — Export (offline, IDE-based)
 
 When you're working in Claude.ai, Cursor, or any AI coding tool that isn't connected to your live site, use the export buttons after scanning:
 
 - **Markdown export** — structured prose with primitives and orchestrators separated, `wp_register_ability()` stubs, source locations, and a "your task" summary. Paste directly into a chat or attach to a prompt.
-- **JSON export** — machine-readable, schema-versioned (`abilities-scout/v1.2`), with `primitives[]` and `orchestrators[]` arrays. Feed to agents that consume structured tool output.
+- **JSON export** — machine-readable, schema-versioned (`lax-abilities-scout/v1.2`), with `primitives[]` and `orchestrators[]` arrays. Feed to agents that consume structured tool output.
 
 Hand either to an AI coding tool and say *"build these abilities."*
 
@@ -65,7 +65,7 @@ The stubs carry the right semantics (hook name, schema shape, source location) s
 
 ## Quick Start
 
-1. Upload `abilities-scout` to `/wp-content/plugins/`
+1. Upload `lax-abilities-scout` to `/wp-content/plugins/`
 2. Activate the plugin
 3. Go to **Abilities > Scout** in the admin menu
 4. Select a plugin, click **Scout Abilities**
@@ -109,7 +109,7 @@ The WordPress Abilities API is designed for **composability**. Abilities work be
 REST endpoint → calls/chains → wp_register_ability() primitives
 ```
 
-Abilities Scout reflects this by:
+Lax Abilities Scout reflects this by:
 
 - **Scoring hooks and shortcodes higher** — these are your primitive candidates
 - **Flagging REST endpoints as orchestrators** — with a recommendation to consume abilities rather than become them
@@ -140,7 +140,7 @@ The exported Markdown separates **Primitive Abilities** from **REST Orchestrator
 
 Found a bug? Have an idea? Contributions are welcome.
 
-- **Report issues** — [Open an issue](https://github.com/laxmariappan/abilities-scout/issues) with your WP version, PHP version, and the plugin you scanned
+- **Report issues** — [Open an issue](https://github.com/laxmariappan/lax-abilities-scout/issues) with your WP version, PHP version, and the plugin you scanned
 - **Submit a PR** — Fork the repo, create a branch, and send a pull request
 - **Suggest plugins to test** — If you find interesting results scanning a plugin, share them in an issue
 
@@ -148,7 +148,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for code standards and guidelines.
 
 ## Support the Project
 
-If Abilities Scout is useful to you:
+If Lax Abilities Scout is useful to you:
 
 - ⭐ **Star this repo** — It helps others discover the project
 - 📣 **Share it** — Post about it, mention it in a talk, or tell a fellow developer

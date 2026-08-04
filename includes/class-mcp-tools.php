@@ -4,7 +4,7 @@
  *
  * Registers WordPress abilities for AI agents to interact with the scanner.
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  */
 
 if (!defined('ABSPATH')) {
@@ -12,9 +12,9 @@ if (!defined('ABSPATH')) {
 }
 
 /**
- * Class Abilities_Scout_MCP_Tools
+ * Class Lax_Abilities_Scout_MCP_Tools
  */
-class Abilities_Scout_MCP_Tools
+class Lax_Abilities_Scout_MCP_Tools
 {
 
     /**
@@ -33,10 +33,10 @@ class Abilities_Scout_MCP_Tools
     public function register_ability_category(): void
     {
         wp_register_ability_category(
-            'abilities-scout',
+            'lax-abilities-scout',
             array(
-                'label' => __('Abilities Scout', 'abilities-scout'),
-                'description' => __('Scans WordPress plugins to detect registerable abilities from hooks, REST routes, and shortcodes, and exposes MCP tools for programmatic access to scan, export, and draft results.', 'abilities-scout'),
+                'label' => __('Lax Abilities Scout', 'lax-abilities-scout'),
+                'description' => __('Scans WordPress plugins to detect registerable abilities from hooks, REST routes, and shortcodes, and exposes MCP tools for programmatic access to scan, export, and draft results.', 'lax-abilities-scout'),
             )
         );
     }
@@ -49,11 +49,11 @@ class Abilities_Scout_MCP_Tools
 
         // Tool: Scan a plugin.
         wp_register_ability(
-            'abilities-scout/scan',
+            'lax-abilities-scout/scan',
             array(
-                'label' => __('Scan Plugin for Abilities', 'abilities-scout'),
-                'description' => __('Scans a specific WordPress plugin to discover hooks, REST routes, and shortcodes that can be used as abilities.', 'abilities-scout'),
-                'category' => 'abilities-scout',
+                'label' => __('Scan Plugin for Abilities', 'lax-abilities-scout'),
+                'description' => __('Scans a specific WordPress plugin to discover hooks, REST routes, and shortcodes that can be used as abilities.', 'lax-abilities-scout'),
+                'category' => 'lax-abilities-scout',
                 'input_schema' => array(
                     'type' => 'object',
                     'properties' => array(
@@ -160,11 +160,11 @@ class Abilities_Scout_MCP_Tools
 
         // Tool: Export scan results.
         wp_register_ability(
-            'abilities-scout/export',
+            'lax-abilities-scout/export',
             array(
-                'label' => __('Export Scan Results', 'abilities-scout'),
-                'description' => __('Generates a report of discovered abilities in Markdown or JSON format.', 'abilities-scout'),
-                'category' => 'abilities-scout',
+                'label' => __('Export Scan Results', 'lax-abilities-scout'),
+                'description' => __('Generates a report of discovered abilities in Markdown or JSON format.', 'lax-abilities-scout'),
+                'category' => 'lax-abilities-scout',
                 'input_schema' => array(
                     'type' => 'object',
                     'properties' => array(
@@ -207,11 +207,11 @@ class Abilities_Scout_MCP_Tools
 
         // Tool: Draft implementation code.
         wp_register_ability(
-            'abilities-scout/draft',
+            'lax-abilities-scout/draft',
             array(
-                'label' => __('Draft Ability Code', 'abilities-scout'),
-                'description' => __('Generates PHP code stubs for registering discovered abilities.', 'abilities-scout'),
-                'category' => 'abilities-scout',
+                'label' => __('Draft Ability Code', 'lax-abilities-scout'),
+                'description' => __('Generates PHP code stubs for registering discovered abilities.', 'lax-abilities-scout'),
+                'category' => 'lax-abilities-scout',
                 'input_schema' => array(
                     'type' => 'object',
                     'properties' => array(
@@ -278,11 +278,11 @@ class Abilities_Scout_MCP_Tools
         list($plugin_data, $plugin_dir) = $validation;
 
         // Run scanner.
-        if (!class_exists('Abilities_Scout_Scanner')) {
+        if (!class_exists('Lax_Abilities_Scout_Scanner')) {
             require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-scanner.php';
         }
 
-        $scanner = new Abilities_Scout_Scanner();
+        $scanner = new Lax_Abilities_Scout_Scanner();
         $results = $scanner->scan_plugin($plugin_dir);
 
         return array(
@@ -350,7 +350,7 @@ class Abilities_Scout_MCP_Tools
             'discovered' => $scan_data['results'],
         );
 
-        $generator = new Abilities_Scout_Export_Generator();
+        $generator = new Lax_Abilities_Scout_Export_Generator();
 
         if ('markdown' === $format) {
             $content = $generator->generate_markdown($export_data);
@@ -387,7 +387,7 @@ class Abilities_Scout_MCP_Tools
             return $scan_results;
         }
 
-        $generator = new Abilities_Scout_Draft_Generator();
+        $generator = new Lax_Abilities_Scout_Draft_Generator();
 
         return $generator->generate_multiple_stubs(
             $scan_results,
@@ -409,7 +409,7 @@ class Abilities_Scout_MCP_Tools
 
         $all_plugins = get_plugins();
         if (!isset($all_plugins[$plugin_file])) {
-            return new WP_Error('plugin_not_found', __('Plugin not found.', 'abilities-scout'));
+            return new WP_Error('plugin_not_found', __('Plugin not found.', 'lax-abilities-scout'));
         }
 
         $plugin_data = $all_plugins[$plugin_file];
@@ -420,7 +420,7 @@ class Abilities_Scout_MCP_Tools
         $real_wp_plugins = realpath(WP_PLUGIN_DIR);
 
         if (false === $real_plugin_dir || false === $real_wp_plugins || !str_starts_with($real_plugin_dir, $real_wp_plugins)) {
-            return new WP_Error('invalid_path', __('Invalid plugin path.', 'abilities-scout'));
+            return new WP_Error('invalid_path', __('Invalid plugin path.', 'lax-abilities-scout'));
         }
 
         return array($plugin_data, $real_plugin_dir);

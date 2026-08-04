@@ -5,7 +5,7 @@
  * Handles admin menu registration, page rendering, asset enqueuing,
  * and AJAX scanning requests.
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  * @license GPL-2.0-or-later
  */
 
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class Abilities_Scout_Admin_Page {
+class Lax_Abilities_Scout_Admin_Page {
 
 	/**
 	 * Plugins to exclude from the scanner dropdown.
@@ -23,7 +23,7 @@ class Abilities_Scout_Admin_Page {
 	private const EXCLUDED_PLUGINS = array(
 		'abilities-api/abilities-api.php',
 		'abilitiesexplorer/abilitiesexplorer.php',
-		'abilities-scout/abilities-scout.php',
+		'lax-abilities-scout/lax-abilities-scout.php',
 	);
 
 	/**
@@ -32,7 +32,7 @@ class Abilities_Scout_Admin_Page {
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'add_submenu' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'wp_ajax_abilities_scout_scan', array( $this, 'ajax_scan_plugin' ) );
+		add_action( 'wp_ajax_lax_abilities_scout_scan', array( $this, 'ajax_scan_plugin' ) );
 	}
 
 	/**
@@ -55,23 +55,23 @@ class Abilities_Scout_Admin_Page {
 
 		if ( ! $explorer_exists ) {
 			add_menu_page(
-				__( 'Abilities', 'abilities-scout' ),
-				__( 'Abilities', 'abilities-scout' ),
+				__( 'Abilities', 'lax-abilities-scout' ),
+				__( 'Abilities', 'lax-abilities-scout' ),
 				'manage_options',
-				'abilities-scout',
+				'lax-abilities-scout',
 				array( $this, 'render_page' ),
 				'dashicons-superhero',
 				30
 			);
-			$parent_slug = 'abilities-scout';
+			$parent_slug = 'lax-abilities-scout';
 		}
 
 		add_submenu_page(
 			$parent_slug,
-			__( 'Scout', 'abilities-scout' ),
-			__( 'Scout', 'abilities-scout' ),
+			__( 'Scout', 'lax-abilities-scout' ),
+			__( 'Scout', 'lax-abilities-scout' ),
 			'manage_options',
-			'abilities-scout',
+			'lax-abilities-scout',
 			array( $this, 'render_page' )
 		);
 	}
@@ -83,8 +83,8 @@ class Abilities_Scout_Admin_Page {
 	 */
 	public function enqueue_assets( string $hook ): void {
 		$allowed_hooks = array(
-			'abilities_page_abilities-scout',
-			'toplevel_page_abilities-scout',
+			'abilities_page_lax-abilities-scout',
+			'toplevel_page_lax-abilities-scout',
 		);
 
 		if ( ! in_array( $hook, $allowed_hooks, true ) ) {
@@ -92,38 +92,38 @@ class Abilities_Scout_Admin_Page {
 		}
 
 		wp_enqueue_style(
-			'abilities-scout-admin',
-			ABILITIES_SCOUT_PLUGIN_URL . 'assets/css/admin.css',
+			'lax-abilities-scout-admin',
+			LAX_ABILITIES_SCOUT_PLUGIN_URL . 'assets/css/admin.css',
 			array(),
-			ABILITIES_SCOUT_VERSION
+			LAX_ABILITIES_SCOUT_VERSION
 		);
 
 		wp_enqueue_script(
-			'abilities-scout-admin',
-			ABILITIES_SCOUT_PLUGIN_URL . 'assets/js/admin.js',
+			'lax-abilities-scout-admin',
+			LAX_ABILITIES_SCOUT_PLUGIN_URL . 'assets/js/admin.js',
 			array( 'jquery' ),
-			ABILITIES_SCOUT_VERSION,
+			LAX_ABILITIES_SCOUT_VERSION,
 			true
 		);
 
 		wp_localize_script(
-			'abilities-scout-admin',
+			'lax-abilities-scout-admin',
 			'abilitiesScout',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'abilities_scout_scan' ),
-				'version' => ABILITIES_SCOUT_VERSION,
+				'nonce'   => wp_create_nonce( 'lax_abilities_scout_scan' ),
+				'version' => LAX_ABILITIES_SCOUT_VERSION,
 				'strings' => array(
-					'scanning'          => __( 'Scanning plugin...', 'abilities-scout' ),
-					'noResults'         => __( 'No potential abilities discovered in this plugin.', 'abilities-scout' ),
-					'error'             => __( 'An error occurred during scanning.', 'abilities-scout' ),
-					'selectPlugin'      => __( 'Please select a plugin to scan.', 'abilities-scout' ),
-					'potentialAbilities' => __( 'Potential Abilities', 'abilities-scout' ),
-					'allDiscoveries'    => __( 'All Discoveries', 'abilities-scout' ),
-					'noPotential'       => __( 'No strong ability candidates found. Check the raw discoveries below for hooks that might be useful.', 'abilities-scout' ),
-					'tool'              => __( 'tool', 'abilities-scout' ),
-					'resource'          => __( 'resource', 'abilities-scout' ),
-					'exportLabel'       => __( 'Export scan results:', 'abilities-scout' ),
+					'scanning'          => __( 'Scanning plugin...', 'lax-abilities-scout' ),
+					'noResults'         => __( 'No potential abilities discovered in this plugin.', 'lax-abilities-scout' ),
+					'error'             => __( 'An error occurred during scanning.', 'lax-abilities-scout' ),
+					'selectPlugin'      => __( 'Please select a plugin to scan.', 'lax-abilities-scout' ),
+					'potentialAbilities' => __( 'Potential Abilities', 'lax-abilities-scout' ),
+					'allDiscoveries'    => __( 'All Discoveries', 'lax-abilities-scout' ),
+					'noPotential'       => __( 'No strong ability candidates found. Check the raw discoveries below for hooks that might be useful.', 'lax-abilities-scout' ),
+					'tool'              => __( 'tool', 'lax-abilities-scout' ),
+					'resource'          => __( 'resource', 'lax-abilities-scout' ),
+					'exportLabel'       => __( 'Export scan results:', 'lax-abilities-scout' ),
 				),
 			)
 		);
@@ -134,7 +134,7 @@ class Abilities_Scout_Admin_Page {
 	 */
 	public function render_page(): void {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'abilities-scout' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'lax-abilities-scout' ) );
 		}
 
 		$all_plugins    = get_plugins();
@@ -168,18 +168,18 @@ class Abilities_Scout_Admin_Page {
 		usort( $inactive_list, fn( $a, $b ) => strcasecmp( $a['name'], $b['name'] ) );
 
 		?>
-		<div class="wrap abilities-scout-wrap">
-			<h1><?php esc_html_e( 'Abilities Scout', 'abilities-scout' ); ?></h1>
+		<div class="wrap lax-abilities-scout-wrap">
+			<h1><?php esc_html_e( 'Lax Abilities Scout', 'lax-abilities-scout' ); ?></h1>
 			<p class="description">
-				<?php esc_html_e( 'Select a plugin to scan for potential abilities that could be registered with the WordPress Abilities API.', 'abilities-scout' ); ?>
+				<?php esc_html_e( 'Select a plugin to scan for potential abilities that could be registered with the WordPress Abilities API.', 'lax-abilities-scout' ); ?>
 			</p>
 
-			<div class="abilities-scout-selector">
-				<select id="abilities-scout-plugin-select">
-					<option value=""><?php esc_html_e( '-- Select a Plugin --', 'abilities-scout' ); ?></option>
+			<div class="lax-abilities-scout-selector">
+				<select id="lax-abilities-scout-plugin-select">
+					<option value=""><?php esc_html_e( '-- Select a Plugin --', 'lax-abilities-scout' ); ?></option>
 
 					<?php if ( ! empty( $active_list ) ) : ?>
-						<optgroup label="<?php esc_attr_e( 'Active Plugins', 'abilities-scout' ); ?>">
+						<optgroup label="<?php esc_attr_e( 'Active Plugins', 'lax-abilities-scout' ); ?>">
 							<?php foreach ( $active_list as $plugin ) : ?>
 								<option value="<?php echo esc_attr( $plugin['file'] ); ?>">
 									<?php
@@ -194,7 +194,7 @@ class Abilities_Scout_Admin_Page {
 					<?php endif; ?>
 
 					<?php if ( ! empty( $inactive_list ) ) : ?>
-						<optgroup label="<?php esc_attr_e( 'Inactive Plugins', 'abilities-scout' ); ?>">
+						<optgroup label="<?php esc_attr_e( 'Inactive Plugins', 'lax-abilities-scout' ); ?>">
 							<?php foreach ( $inactive_list as $plugin ) : ?>
 								<option value="<?php echo esc_attr( $plugin['file'] ); ?>">
 									<?php
@@ -209,17 +209,17 @@ class Abilities_Scout_Admin_Page {
 					<?php endif; ?>
 				</select>
 
-				<button type="button" id="abilities-scout-scan-btn" class="button button-primary">
-					<?php esc_html_e( 'Scout Abilities', 'abilities-scout' ); ?>
+				<button type="button" id="lax-abilities-scout-scan-btn" class="button button-primary">
+					<?php esc_html_e( 'Scout Abilities', 'lax-abilities-scout' ); ?>
 				</button>
 			</div>
 
-			<div id="abilities-scout-loading" class="abilities-scout-loading" style="display: none;">
+			<div id="lax-abilities-scout-loading" class="lax-abilities-scout-loading" style="display: none;">
 				<span class="spinner is-active" style="float: none;"></span>
-				<p><?php esc_html_e( 'Scanning plugin files...', 'abilities-scout' ); ?></p>
+				<p><?php esc_html_e( 'Scanning plugin files...', 'lax-abilities-scout' ); ?></p>
 			</div>
 
-			<div id="abilities-scout-results" style="display: none;"></div>
+			<div id="lax-abilities-scout-results" style="display: none;"></div>
 		</div>
 		<?php
 	}
@@ -228,22 +228,22 @@ class Abilities_Scout_Admin_Page {
 	 * AJAX handler for scanning a plugin.
 	 */
 	public function ajax_scan_plugin(): void {
-		check_ajax_referer( 'abilities_scout_scan', 'nonce' );
+		check_ajax_referer( 'lax_abilities_scout_scan', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'abilities-scout' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'lax-abilities-scout' ) ) );
 		}
 
 		$plugin_file = isset( $_POST['plugin'] ) ? sanitize_text_field( wp_unslash( $_POST['plugin'] ) ) : '';
 
 		if ( empty( $plugin_file ) ) {
-			wp_send_json_error( array( 'message' => __( 'No plugin specified.', 'abilities-scout' ) ) );
+			wp_send_json_error( array( 'message' => __( 'No plugin specified.', 'lax-abilities-scout' ) ) );
 		}
 
 		// Validate plugin exists.
 		$all_plugins = get_plugins();
 		if ( ! isset( $all_plugins[ $plugin_file ] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Plugin not found.', 'abilities-scout' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Plugin not found.', 'lax-abilities-scout' ) ) );
 		}
 
 		$plugin_data = $all_plugins[ $plugin_file ];
@@ -254,11 +254,11 @@ class Abilities_Scout_Admin_Page {
 		$real_wp_plugins = realpath( WP_PLUGIN_DIR );
 
 		if ( false === $real_plugin_dir || false === $real_wp_plugins || ! str_starts_with( $real_plugin_dir, $real_wp_plugins ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid plugin path.', 'abilities-scout' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid plugin path.', 'lax-abilities-scout' ) ) );
 		}
 
 		// Run scanner.
-		$scanner = new Abilities_Scout_Scanner();
+		$scanner = new Lax_Abilities_Scout_Scanner();
 		$results = $scanner->scan_plugin( $real_plugin_dir );
 
 		wp_send_json_success(

@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name: Abilities Scout
+ * Plugin Name: Lax Abilities Scout
  * Plugin URI: https://github.com/laxmariappan/abilities-scout
  * Description: Scans installed plugins and discovers potential abilities for the WordPress Abilities API. A companion to the Abilities Explorer plugin.
  * Version: 1.2.0
- * Requires at least: 6.0
+ * Requires at least: 6.9
  * Requires PHP: 8.0
  * Author: Lax Mariappan
  * Author URI: https://github.com/laxmariappan
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: abilities-scout
+ * Text Domain: lax-abilities-scout
  */
 
 // Exit if accessed directly.
@@ -19,34 +19,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Prevent double-loading.
-if ( defined( 'ABILITIES_SCOUT_VERSION' ) ) {
+if ( defined( 'LAX_ABILITIES_SCOUT_VERSION' ) ) {
 	return;
 }
 
 // Define plugin constants.
-define( 'ABILITIES_SCOUT_VERSION', '1.2.0' );
-define( 'ABILITIES_SCOUT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'ABILITIES_SCOUT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'ABILITIES_SCOUT_PLUGIN_FILE', __FILE__ );
+define( 'LAX_ABILITIES_SCOUT_VERSION', '1.2.0' );
+define( 'LAX_ABILITIES_SCOUT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'LAX_ABILITIES_SCOUT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'LAX_ABILITIES_SCOUT_PLUGIN_FILE', __FILE__ );
 
 /**
- * Main Abilities Scout class.
+ * Main Lax Abilities Scout class.
  */
-class Abilities_Scout {
+class Lax_Abilities_Scout {
 
 	/**
 	 * Single instance of the class.
 	 *
-	 * @var Abilities_Scout|null
+	 * @var Lax_Abilities_Scout|null
 	 */
-	private static ?Abilities_Scout $instance = null;
+	private static ?Lax_Abilities_Scout $instance = null;
 
 	/**
 	 * Get single instance.
 	 *
-	 * @return Abilities_Scout
+	 * @return Lax_Abilities_Scout
 	 */
-	public static function get_instance(): Abilities_Scout {
+	public static function get_instance(): Lax_Abilities_Scout {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -77,14 +77,14 @@ class Abilities_Scout {
 	 * Load plugin dependencies.
 	 */
 	private function load_dependencies(): void {
-		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-scanner.php';
-		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-mcp-tools.php';
-		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-export-generator.php';
-		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-draft-generator.php';
+		require_once LAX_ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-scanner.php';
+		require_once LAX_ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-mcp-tools.php';
+		require_once LAX_ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-export-generator.php';
+		require_once LAX_ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-draft-generator.php';
 
 		// Initialize MCP tools (only if Abilities API is available).
 		if ( function_exists( 'wp_register_ability' ) ) {
-			new Abilities_Scout_MCP_Tools();
+			new Lax_Abilities_Scout_MCP_Tools();
 		}
 	}
 
@@ -102,12 +102,12 @@ class Abilities_Scout {
 		}
 		$this->admin_initialized = true;
 
-		require_once ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-admin-page.php';
+		require_once LAX_ABILITIES_SCOUT_PLUGIN_DIR . 'includes/class-admin-page.php';
 
-		$admin_page = new Abilities_Scout_Admin_Page();
+		$admin_page = new Lax_Abilities_Scout_Admin_Page();
 		$admin_page->init();
 	}
 }
 
 // Initialize the plugin.
-Abilities_Scout::get_instance();
+Lax_Abilities_Scout::get_instance();

@@ -1,17 +1,17 @@
 /**
- * Abilities Scout Admin JavaScript
+ * Lax Abilities Scout Admin JavaScript
  *
- * @package Abilities_Scout
+ * @package Lax_Abilities_Scout
  * @license GPL-2.0-or-later
  *
- * This file is part of Abilities Scout.
+ * This file is part of Lax Abilities Scout.
  *
- * Abilities Scout is free software: you can redistribute it and/or modify
+ * Lax Abilities Scout is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
- * Abilities Scout is distributed in the hope that it will be useful,
+ * Lax Abilities Scout is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -33,20 +33,20 @@
 		},
 
 		bindEvents: function() {
-			$('#abilities-scout-scan-btn').on('click', this.scanPlugin.bind(this));
+			$('#lax-abilities-scout-scan-btn').on('click', this.scanPlugin.bind(this));
 		},
 
 		scanPlugin: function() {
-			const pluginSlug = $('#abilities-scout-plugin-select').val();
+			const pluginSlug = $('#lax-abilities-scout-plugin-select').val();
 
 			if (!pluginSlug) {
 				this.showNotice('error', abilitiesScout.strings.selectPlugin);
 				return;
 			}
 
-			const $btn = $('#abilities-scout-scan-btn');
-			const $loading = $('#abilities-scout-loading');
-			const $results = $('#abilities-scout-results');
+			const $btn = $('#lax-abilities-scout-scan-btn');
+			const $loading = $('#lax-abilities-scout-loading');
+			const $results = $('#lax-abilities-scout-results');
 
 			// Show loading state.
 			$btn.prop('disabled', true);
@@ -57,7 +57,7 @@
 				url: abilitiesScout.ajaxUrl,
 				type: 'POST',
 				data: {
-					action: 'abilities_scout_scan',
+					action: 'lax_abilities_scout_scan',
 					nonce: abilitiesScout.nonce,
 					plugin: pluginSlug
 				},
@@ -81,7 +81,7 @@
 		renderResults: function(data) {
 			this.lastScanData = data;
 
-			const $results = $('#abilities-scout-results');
+			const $results = $('#lax-abilities-scout-results');
 			const discovered = data.discovered;
 			const abilities = discovered.potential_abilities || [];
 			let html = '';
@@ -121,7 +121,7 @@
 				authorHtml = '<a href="' + this.escapeHtml(info.url) + '" target="_blank" rel="noopener noreferrer">' + authorHtml + '</a>';
 			}
 
-			return '<div class="abilities-scout-plugin-info">' +
+			return '<div class="lax-abilities-scout-plugin-info">' +
 				'<h2>' + this.escapeHtml(info.name) +
 				(info.version ? ' <small>v' + this.escapeHtml(info.version) + '</small>' : '') +
 				'</h2>' +
@@ -134,12 +134,12 @@
 			const stats = discovered.stats;
 			const abilitiesCount = stats.potential_abilities_count || 0;
 
-			let html = '<div class="abilities-scout-stats">';
+			let html = '<div class="lax-abilities-scout-stats">';
 
 			// Highlighted potential abilities stat.
-			html += '<div class="abilities-scout-stat-card abilities-scout-stat-highlight">' +
-				'<div class="abilities-scout-stat-number">' + abilitiesCount + '</div>' +
-				'<div class="abilities-scout-stat-label">Potential Abilities</div>' +
+			html += '<div class="lax-abilities-scout-stat-card lax-abilities-scout-stat-highlight">' +
+				'<div class="lax-abilities-scout-stat-number">' + abilitiesCount + '</div>' +
+				'<div class="lax-abilities-scout-stat-label">Potential Abilities</div>' +
 				'</div>';
 
 			html += this.renderStatCard(discovered.actions.length, 'Actions');
@@ -163,9 +163,9 @@
 		},
 
 		renderStatCard: function(number, label) {
-			return '<div class="abilities-scout-stat-card">' +
-				'<div class="abilities-scout-stat-number">' + this.escapeHtml(String(number)) + '</div>' +
-				'<div class="abilities-scout-stat-label">' + this.escapeHtml(label) + '</div>' +
+			return '<div class="lax-abilities-scout-stat-card">' +
+				'<div class="lax-abilities-scout-stat-number">' + this.escapeHtml(String(number)) + '</div>' +
+				'<div class="lax-abilities-scout-stat-label">' + this.escapeHtml(label) + '</div>' +
 				'</div>';
 		},
 
@@ -185,11 +185,11 @@
 				return a.role === 'orchestrator';
 			});
 
-			let html = '<div class="abilities-scout-section">';
+			let html = '<div class="lax-abilities-scout-section">';
 			html += '<h3>' + this.escapeHtml(abilitiesScout.strings.potentialAbilities) + '</h3>';
 
 			if (meaningful.length === 0) {
-				html += '<p class="abilities-scout-empty">' +
+				html += '<p class="lax-abilities-scout-empty">' +
 					this.escapeHtml(abilitiesScout.strings.noPotential) + '</p>';
 				html += '</div>';
 				return html;
@@ -197,9 +197,9 @@
 
 			// --- Primitive Abilities ---
 			if (primitives.length > 0) {
-				html += '<h4 class="abilities-scout-role-heading">Primitive Abilities <span class="abilities-scout-role-count">(' + primitives.length + ')</span></h4>';
+				html += '<h4 class="lax-abilities-scout-role-heading">Primitive Abilities <span class="lax-abilities-scout-role-count">(' + primitives.length + ')</span></h4>';
 				html += '<p class="description">These hooks and shortcodes are atomic, reusable units — register these as abilities using <code>wp_register_ability()</code>.</p>';
-				html += '<div class="abilities-scout-ability-grid">';
+				html += '<div class="lax-abilities-scout-ability-grid">';
 				primitives.forEach(function(ability) {
 					html += AbilitiesScout.renderAbilityCard(ability);
 				});
@@ -208,13 +208,13 @@
 
 			// --- REST Orchestrators ---
 			if (orchestrators.length > 0) {
-				html += '<h4 class="abilities-scout-role-heading abilities-scout-role-heading-orchestrator">REST Endpoints <span class="abilities-scout-role-count">(' + orchestrators.length + ')</span></h4>';
-				html += '<div class="abilities-scout-orchestrator-notice">' +
+				html += '<h4 class="lax-abilities-scout-role-heading lax-abilities-scout-role-heading-orchestrator">REST Endpoints <span class="lax-abilities-scout-role-count">(' + orchestrators.length + ')</span></h4>';
+				html += '<div class="lax-abilities-scout-orchestrator-notice">' +
 					'<strong>Architectural note:</strong> These REST endpoints are <em>orchestration layers</em> — ' +
 					'they should <strong>consume and chain abilities</strong> rather than become one. ' +
 					'Register the primitive abilities above, then call them from these endpoints.' +
 					'</div>';
-				html += '<div class="abilities-scout-ability-grid">';
+				html += '<div class="lax-abilities-scout-ability-grid">';
 				orchestrators.forEach(function(ability) {
 					html += AbilitiesScout.renderAbilityCard(ability);
 				});
@@ -227,10 +227,10 @@
 
 		renderAbilityCard: function(ability) {
 			const isOrchestrator = ability.role === 'orchestrator';
-			let html = '<div class="abilities-scout-ability-card' + (isOrchestrator ? ' scout-card-orchestrator' : '') + '">';
+			let html = '<div class="lax-abilities-scout-ability-card' + (isOrchestrator ? ' scout-card-orchestrator' : '') + '">';
 
 			// Badges row.
-			html += '<div class="abilities-scout-card-badges">';
+			html += '<div class="lax-abilities-scout-card-badges">';
 			html += '<span class="scout-badge scout-badge-' + this.escapeHtml(ability.confidence) + '">' +
 				this.escapeHtml(ability.confidence) + '</span>';
 			if (isOrchestrator) {
@@ -248,11 +248,11 @@
 
 			// Label and suggested name.
 			html += '<h4>' + this.escapeHtml(ability.label) + '</h4>';
-			html += '<code class="abilities-scout-ability-name">' +
+			html += '<code class="lax-abilities-scout-ability-name">' +
 				this.escapeHtml(ability.suggested_name) + '</code>';
 
 			// Source details.
-			html += '<div class="abilities-scout-card-source">';
+			html += '<div class="lax-abilities-scout-card-source">';
 			if (ability.source_type === 'rest_route') {
 				html += '<span class="scout-source-detail">' +
 					this.escapeHtml(ability.source.full_route) + '</span>';
@@ -291,13 +291,13 @@
 				{ key: 'shortcodes', label: 'Shortcodes', count: discovered.shortcodes.length }
 			];
 
-			let html = '<div class="abilities-scout-section abilities-scout-collapsible">';
+			let html = '<div class="lax-abilities-scout-section lax-abilities-scout-collapsible">';
 
 			// Collapsible toggle.
-			html += '<button class="abilities-scout-toggle" type="button">';
-			html += '<span class="abilities-scout-toggle-icon dashicons dashicons-arrow-right-alt2"></span>';
+			html += '<button class="lax-abilities-scout-toggle" type="button">';
+			html += '<span class="lax-abilities-scout-toggle-icon dashicons dashicons-arrow-right-alt2"></span>';
 			html += this.escapeHtml(abilitiesScout.strings.allDiscoveries) +
-				' <span class="abilities-scout-toggle-count">(' + totalDiscoveries + ' items: ' +
+				' <span class="lax-abilities-scout-toggle-count">(' + totalDiscoveries + ' items: ' +
 				discovered.actions.length + ' actions, ' +
 				discovered.filters.length + ' filters, ' +
 				discovered.rest_routes.length + ' routes, ' +
@@ -305,16 +305,16 @@
 			html += '</button>';
 
 			// Collapsible content.
-			html += '<div class="abilities-scout-collapsible-content" style="display: none;">';
+			html += '<div class="lax-abilities-scout-collapsible-content" style="display: none;">';
 
 			html += '<p class="description">Raw discoveries from static code analysis (' +
 				this.escapeHtml(String(discovered.stats.files_scanned)) + ' files scanned in ' +
 				this.escapeHtml(String(discovered.stats.scan_time_ms)) + 'ms).</p>';
 
 			// Tab headers.
-			html += '<div class="abilities-scout-tabs">';
+			html += '<div class="lax-abilities-scout-tabs">';
 			tabs.forEach(function(tab, index) {
-				html += '<button class="abilities-scout-tab' + (index === 0 ? ' active' : '') +
+				html += '<button class="lax-abilities-scout-tab' + (index === 0 ? ' active' : '') +
 					'" data-tab="' + tab.key + '">' +
 					AbilitiesScout.escapeHtml(tab.label) + ' (' + tab.count + ')</button>';
 			});
@@ -331,16 +331,16 @@
 		},
 
 		renderHookTable: function(key, hooks, isFirst) {
-			let html = '<div class="abilities-scout-tab-content' + (isFirst ? ' active' : '') +
+			let html = '<div class="lax-abilities-scout-tab-content' + (isFirst ? ' active' : '') +
 				'" data-tab="' + key + '">';
 
 			if (hooks.length === 0) {
-				html += '<p class="abilities-scout-empty">No ' + key + ' discovered.</p>';
+				html += '<p class="lax-abilities-scout-empty">No ' + key + ' discovered.</p>';
 				html += '</div>';
 				return html;
 			}
 
-			html += '<table class="abilities-scout-hooks-table widefat striped">';
+			html += '<table class="lax-abilities-scout-hooks-table widefat striped">';
 			html += '<thead><tr>';
 			html += '<th>Hook Name</th>';
 			html += '<th>File</th>';
@@ -369,15 +369,15 @@
 		},
 
 		renderRestRouteTable: function(routes) {
-			let html = '<div class="abilities-scout-tab-content" data-tab="rest_routes">';
+			let html = '<div class="lax-abilities-scout-tab-content" data-tab="rest_routes">';
 
 			if (routes.length === 0) {
-				html += '<p class="abilities-scout-empty">No REST routes discovered.</p>';
+				html += '<p class="lax-abilities-scout-empty">No REST routes discovered.</p>';
 				html += '</div>';
 				return html;
 			}
 
-			html += '<table class="abilities-scout-hooks-table widefat striped">';
+			html += '<table class="lax-abilities-scout-hooks-table widefat striped">';
 			html += '<thead><tr>';
 			html += '<th>Route</th>';
 			html += '<th>Namespace</th>';
@@ -399,15 +399,15 @@
 		},
 
 		renderShortcodeTable: function(shortcodes) {
-			let html = '<div class="abilities-scout-tab-content" data-tab="shortcodes">';
+			let html = '<div class="lax-abilities-scout-tab-content" data-tab="shortcodes">';
 
 			if (shortcodes.length === 0) {
-				html += '<p class="abilities-scout-empty">No shortcodes discovered.</p>';
+				html += '<p class="lax-abilities-scout-empty">No shortcodes discovered.</p>';
 				html += '</div>';
 				return html;
 			}
 
-			html += '<table class="abilities-scout-hooks-table widefat striped">';
+			html += '<table class="lax-abilities-scout-hooks-table widefat striped">';
 			html += '<thead><tr>';
 			html += '<th>Shortcode</th>';
 			html += '<th>File</th>';
@@ -431,30 +431,30 @@
 		// =====================================================================
 
 		renderFooter: function() {
-			return '<div class="abilities-scout-footer">' +
+			return '<div class="lax-abilities-scout-footer">' +
 				'<p>Found something interesting? ' +
-				'<a href="https://github.com/laxmariappan/abilities-scout/issues" target="_blank" rel="noopener noreferrer">' +
+				'<a href="https://github.com/laxmariappan/lax-abilities-scout/issues" target="_blank" rel="noopener noreferrer">' +
 				'Share your feedback on GitHub</a></p>' +
 				'</div>';
 		},
 
 		initTabs: function() {
-			$('.abilities-scout-tab').on('click', function() {
+			$('.lax-abilities-scout-tab').on('click', function() {
 				const tabKey = $(this).data('tab');
-				const $section = $(this).closest('.abilities-scout-section');
+				const $section = $(this).closest('.lax-abilities-scout-section');
 
-				$section.find('.abilities-scout-tab').removeClass('active');
+				$section.find('.lax-abilities-scout-tab').removeClass('active');
 				$(this).addClass('active');
 
-				$section.find('.abilities-scout-tab-content').removeClass('active');
-				$section.find('.abilities-scout-tab-content[data-tab="' + tabKey + '"]').addClass('active');
+				$section.find('.lax-abilities-scout-tab-content').removeClass('active');
+				$section.find('.lax-abilities-scout-tab-content[data-tab="' + tabKey + '"]').addClass('active');
 			});
 		},
 
 		initCollapsible: function() {
-			$('.abilities-scout-toggle').on('click', function() {
-				const $content = $(this).siblings('.abilities-scout-collapsible-content');
-				const $icon = $(this).find('.abilities-scout-toggle-icon');
+			$('.lax-abilities-scout-toggle').on('click', function() {
+				const $content = $(this).siblings('.lax-abilities-scout-collapsible-content');
+				const $icon = $(this).find('.lax-abilities-scout-toggle-icon');
 
 				$content.slideToggle(200);
 				$icon.toggleClass('dashicons-arrow-right-alt2 dashicons-arrow-down-alt2');
@@ -466,19 +466,19 @@
 		// =====================================================================
 
 		renderExportToolbar: function() {
-			return '<div class="abilities-scout-export-toolbar">' +
-				'<span class="abilities-scout-export-label">' +
+			return '<div class="lax-abilities-scout-export-toolbar">' +
+				'<span class="lax-abilities-scout-export-label">' +
 				this.escapeHtml(abilitiesScout.strings.exportLabel) + '</span>' +
-				'<button type="button" class="button abilities-scout-export-btn" data-format="markdown">' +
+				'<button type="button" class="button lax-abilities-scout-export-btn" data-format="markdown">' +
 				'<span class="dashicons dashicons-media-text"></span> Markdown</button>' +
-				'<button type="button" class="button abilities-scout-export-btn" data-format="json">' +
+				'<button type="button" class="button lax-abilities-scout-export-btn" data-format="json">' +
 				'<span class="dashicons dashicons-editor-code"></span> JSON</button>' +
 				'</div>';
 		},
 
 		bindExportEvents: function() {
 			var self = this;
-			$('.abilities-scout-export-btn').off('click').on('click', function() {
+			$('.lax-abilities-scout-export-btn').off('click').on('click', function() {
 				var format = $(this).data('format');
 				self.exportResults(format);
 			});
@@ -502,7 +502,7 @@
 			}
 
 			var slug = this.slugify(this.lastScanData.plugin_info.name);
-			var filename = slug + '-abilities-scout.' + extension;
+			var filename = slug + '-lax-abilities-scout.' + extension;
 
 			this.downloadFile(content, filename, mimeType);
 		},
@@ -541,8 +541,8 @@
 			var discovered = data.discovered;
 
 			var exportData = {
-				'$schema': 'abilities-scout/v1.2',
-				'generator': 'Abilities Scout ' + (abilitiesScout.version || '1.0.0'),
+				'$schema': 'lax-abilities-scout/v1.2',
+				'generator': 'Lax Abilities Scout ' + (abilitiesScout.version || '1.0.0'),
 				'exported_at': new Date().toISOString(),
 				'plugin': {
 					'name': info.name,
@@ -612,7 +612,7 @@
 			var lines = [];
 
 			// Title.
-			lines.push('# Abilities Scout Report: ' + info.name);
+			lines.push('# Lax Abilities Scout Report: ' + info.name);
 			lines.push('');
 
 			// Metadata.
@@ -624,7 +624,7 @@
 				lines.push('**URL:** ' + info.url);
 			}
 			lines.push('**Scanned:** ' + new Date().toISOString().split('T')[0]);
-			lines.push('**Generator:** Abilities Scout ' + (abilitiesScout.version || '1.0.0'));
+			lines.push('**Generator:** Lax Abilities Scout ' + (abilitiesScout.version || '1.0.0'));
 			lines.push('');
 
 			// AI Agent Preamble.
@@ -632,7 +632,7 @@
 			lines.push('');
 			lines.push('## How to Use This Document');
 			lines.push('');
-			lines.push('This document contains scan results from **Abilities Scout**, which analyzed the ' +
+			lines.push('This document contains scan results from **Lax Abilities Scout**, which analyzed the ' +
 				info.name + ' plugin to discover hooks, REST routes, and shortcodes that could be ' +
 				'registered as **abilities** using the WordPress Abilities API.');
 			lines.push('');
@@ -870,7 +870,7 @@
 			// Footer.
 			lines.push('---');
 			lines.push('');
-			lines.push('*Generated by [Abilities Scout](https://github.com/laxmariappan/abilities-scout)*');
+			lines.push('*Generated by [Lax Abilities Scout](https://github.com/laxmariappan/lax-abilities-scout)*');
 
 			return lines.join('\n');
 		},
@@ -883,7 +883,7 @@
 			const validTypes = ['error', 'success', 'warning', 'info'];
 			type = validTypes.includes(type) ? type : 'error';
 
-			const $results = $('#abilities-scout-results');
+			const $results = $('#lax-abilities-scout-results');
 			$results.html(
 				'<div class="notice notice-' + type + ' inline"><p>' +
 				this.escapeHtml(message) + '</p></div>'
